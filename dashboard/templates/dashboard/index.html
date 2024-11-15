@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control App</title>
+    <link rel="stylesheet" href="{% static 'dashboard/styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="title">Control App</div>
+            <div id="time-display" class="time-display">{{ current_time }}</div>
+        </header>
+
+        <!-- Current View Section -->
+        <section id="current-view" class="tile-view">
+            <h2>Current View</h2>
+            <div class="tile-grid">
+                {% for i in tile_range %}
+                    <div class="tile-container">
+                        <div class="tile-label">A{{ i }}</div>
+                        <div class="tile" id="current-tile-{{ i }}"></div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Preview View Section -->
+        <section id="preview-view" class="tile-view">
+            <h2>Preview View</h2>
+            <div class="tile-grid">
+                {% for i in tile_range %}
+                    <div class="tile-container">
+                        <div class="tile-label">A{{ i }}</div>
+                        <div class="tile" id="preview-tile-{{ i }}"></div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <script src="{% static 'dashboard/scripts.js' %}"></script>
+</body>
+</html>
