@@ -19,6 +19,17 @@ TILE_DEVICE_MAP = {
     "0": [39265, 39262, 39266, 39264, None, None, None, None, None, None, None, None, None, None, None],
 }
 
+payload_map = {
+    "17": ["17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"],
+    "18": ["31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44"],
+    "19": ["45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58"],
+    "20": ["59", "60", "61", "62"],
+    "21": ["63", "64", "65", "66"],
+    "22": ["67", "68", "69", "70"],
+    "23": ["71", "72", "73", "74", "75", "76", "77"],
+    "24": ["78", "79", "80", "81", "82", "83", "84"],
+}
+
 
 
 def control_view(request):
@@ -42,21 +53,43 @@ def trigger_action(request):
         if not tile or not payload:
                 return JsonResponse({"error": "Missing tile or payload"}, status=400)
         
-        device_ids = TILE_DEVICE_MAP.get(tile)
-        if device_ids is None:
-                return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
-        
-        # 
-        def send_request(device_id):
-            if device_id is None:
-                return None
-            url = f'https://info-beamer.com/api/v1/device/{device_id}/node/root/remote/trigger/'
-            response = requests.post(url, data={"data": payload}, auth=('', api_key))
-            return {"device_id": device_id, "status": response.status_code}
+        payload_int = int(payload)
+        print(payload_int)
+        if payload_int < 17:
+            device_ids = TILE_DEVICE_MAP.get(tile)
+            if device_ids is None:
+                    return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
+            
+            # 
+            def send_request(device_id):
+                if device_id is None:
+                    return None
+                url = f'https://info-beamer.com/api/v1/device/{device_id}/node/root/remote/trigger/'
+                response = requests.post(url, data={"data": payload}, auth=('', api_key))
+                return {"device_id": device_id, "status": response.status_code}
 
-        # Use ThreadPoolExecutor to send requests concurrently
-        with ThreadPoolExecutor() as executor:
-            responses = list(executor.map(send_request, device_ids))
+            # Use ThreadPoolExecutor to send requests concurrently
+            with ThreadPoolExecutor() as executor:
+                responses = list(executor.map(send_request, device_ids))
+
+        else:
+            device_ids = TILE_DEVICE_MAP.get(tile)
+            if device_ids is None:
+                    return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
+            
+            if len(device_ids) != len(payload_map[payload]):
+                return JsonResponse({"error": f"Tile {tile} does not have the correct number of devices"}, status=400)
+            
+            def send_request(device_id, payload):
+                if device_id is None:
+                    return None
+                url = f'https://info-beamer.com/api/v1/device/{device_id}/node/root/remote/trigger/'
+                response = requests.post(url, data={"data": payload}, auth=('', api_key))
+                return {"device_id": device_id, "status": response.status_code}
+
+            # Use ThreadPoolExecutor to send requests concurrently
+            with ThreadPoolExecutor() as executor:
+                responses = list(executor.map(send_request, device_ids, payload_map[payload]))
 
         # Filter out None responses
         responses = [response for response in responses if response is not None]
