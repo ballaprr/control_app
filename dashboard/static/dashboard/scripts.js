@@ -43,8 +43,7 @@ function applyColors() {
     }
 }
 
-function sendTriggerRequest() {
-    const payload = { data: 'a' };
+function sendTriggerRequest(tile, payload) {
 
     fetch('/trigger-action/', {  // This URL should match the Django view URL
         method: 'POST',
@@ -52,7 +51,10 @@ function sendTriggerRequest() {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCsrfToken()  // If CSRF protection is enabled
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+            tile: tile,
+            payload: payload
+        })
     })
     .then(response => response.json())
 }
@@ -78,18 +80,16 @@ function handleKeyPress(event) {
     // Map keypress to tile index (A1 to A14)
     const keyToTileGroupMap = {
         '0': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],  // All tiles
-        '1A': [1, 2, 3, 4],    // Tiles A1 to A4
-        '1B': [6, 7, 8, 9],    // Tiles A6 to A9
-        '1C': [11, 12, 13, 14], // Tiles A11 to A14
-        '1D': [1, 2, 3, 4, 5, 6, 7], // Tiles A1 to A7
-        '1E': [8, 9, 10, 11, 12, 13, 14] // Tiles A8 to A14
+        'a': [1, 2, 3, 4],    // Tiles A1 to A4
+        'b': [6, 7, 8, 9],    // Tiles A6 to A9
+        'c': [11, 12, 13, 14], // Tiles A11 to A14
+        'd': [1, 2, 3, 4, 5, 6, 7], // Tiles A1 to A7
+        'e': [8, 9, 10, 11, 12, 13, 14] // Tiles A8 to A14
     };
     console.log(keyBuffer);
     if (keyToTileGroupMap[keyBuffer]) {
         const tileIndices = keyToTileGroupMap[keyBuffer];
         selectTile(tileIndices);
-
-        sendTriggerRequest(); // Send selected tiles to Django
         
         // Clear the buffer after a match
         keyBuffer = "";
@@ -98,6 +98,7 @@ function handleKeyPress(event) {
     // Apply the color changes when Enter is pressed
     if (event.key === 'Enter') {
         applyColors();
+        sendTriggerRequest(keyBuffer, 1); // Send selected tiles to Django
         keyBuffer = ""; // Clear buffer after Enter
     }
     

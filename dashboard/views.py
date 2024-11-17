@@ -35,8 +35,9 @@ def control_view(request):
 def trigger_action(request):
     if request.method == "POST":
         api_key = os.getenv("API_KEY")
-        tile = "a"
-        payload = "2"
+        data = json.loads(request.body)
+        tile = data.get("tile")
+        payload = data.get("payload")
         # Forward the request to the external API
         if not tile or not payload:
                 return JsonResponse({"error": "Missing tile or payload"}, status=400)
