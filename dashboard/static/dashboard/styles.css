@@ -92,6 +92,12 @@ button {
     padding-right: 20px;
 }
 
+#first-param, #second-param {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 5px;
+}
+
 .tile-container {
     display: flex;
     flex-direction: column;

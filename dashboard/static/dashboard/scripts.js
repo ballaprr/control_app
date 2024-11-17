@@ -1,5 +1,7 @@
 // Store the selected tiles for both current and proposed views
 let keyBuffer = "";
+let firstParam = "";
+let secondParam = null;
 
 let selectedTiles = {
     current: null,
@@ -87,18 +89,31 @@ function handleKeyPress(event) {
         'e': [8, 9, 10, 11, 12, 13, 14] // Tiles A8 to A14
     };
     console.log(keyBuffer);
-    if (keyToTileGroupMap[keyBuffer]) {
+    if (['0', 'a', 'b', 'c', 'd', 'e'].includes(keyBuffer)) {
+        firstParam = keyBuffer;
         const tileIndices = keyToTileGroupMap[keyBuffer];
         selectTile(tileIndices);
-        
-        // Clear the buffer after a match
+        // Display first parameter on the UI (can be adapted for your UI framework)
+        document.getElementById('first-param').textContent = `First Parameter: ${firstParam}`;
+        console.log("firstParam: ", firstParam);
+        keyBuffer = "";
+    }
+
+    const validSecondParams = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'];
+    // const secondParamInt = parseInt(keyBuffer, 10);
+
+    if (validSecondParams.includes(keyBuffer)) {
+        secondParam = keyBuffer;
+        // Display second parameter on the UI (can be adapted for your UI framework)
+        document.getElementById('second-param').textContent = `Second Parameter: ${secondParam}`;
+        console.log("secondParam: ", secondParam);
         keyBuffer = "";
     }
 
     // Apply the color changes when Enter is pressed
     if (event.key === 'Enter') {
         applyColors();
-        sendTriggerRequest(keyBuffer, 1); // Send selected tiles to Django
+        sendTriggerRequest(firstParam, secondParam); // Send selected tiles to Django
         keyBuffer = ""; // Clear buffer after Enter
     }
     
