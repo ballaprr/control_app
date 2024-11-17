@@ -19,12 +19,9 @@ function updateTime() {
 // Call updateTime every 1000 milliseconds (1 second)
 setInterval(updateTime, 1000);
 
-// Select a tile and highlight it
 function selectTile(tileIndices) {
     tileIndices.forEach(tileIndex => {
         const previewTile = document.getElementById(`preview-tile-${tileIndex}`);
-
-        // Check if tile is already selected
         if (selectedTiles.preview.has(tileIndex)) {
             previewTile.style.backgroundColor = ""; // Reset color if already selected
             selectedTiles.preview.delete(tileIndex); // Remove tile from the selected set
@@ -46,6 +43,43 @@ function applyColors() {
     }
 }
 
+function sendTriggerRequest() {
+    const payload = { data: 'a' };
+
+    fetch('/trigger-action/', {  // This URL should match the Django view URL
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()  // If CSRF protection is enabled
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.ok) {
+            console.log('Action triggered successfully!');
+            console.log('Action triggered successfully!');
+        } else {
+            console.log('Error:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+// CSRF token helper
+function getCsrfToken() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') {
+            return value;
+        }
+    }
+    return null;
+}
+
 function handleKeyPress(event) {
 
     if (event.key.length === 1 || event.key === 'Enter') { // Add single characters and Enter key
@@ -61,10 +95,12 @@ function handleKeyPress(event) {
         '1D': [1, 2, 3, 4, 5, 6, 7], // Tiles A1 to A7
         '1E': [8, 9, 10, 11, 12, 13, 14] // Tiles A8 to A14
     };
-
+    console.log(keyBuffer);
     if (keyToTileGroupMap[keyBuffer]) {
         const tileIndices = keyToTileGroupMap[keyBuffer];
         selectTile(tileIndices);
+
+        sendTriggerRequest(); // Send selected tiles to Django
         
         // Clear the buffer after a match
         keyBuffer = "";

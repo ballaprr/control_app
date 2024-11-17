@@ -20,4 +20,5 @@ from dashboard import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.control_view, name='control_view'),
+    path('trigger-action/', views.trigger_action, name='trigger_action'),
 ]

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +27,9 @@ SECRET_KEY = 'django-insecure-xlydeknjvyy1s&^!#!w3al6d52o)5pj&)%c3dfnwpfd9^cqs@_
 DEBUG = True
 
 ALLOWED_HOSTS = []
+# In settings.py
+SECURE_SSL_REDIRECT = False  # Don't redirect to HTTPS in development
+
 
 
 # Application definition
@@ -39,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'dashboard',
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

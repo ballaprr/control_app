@@ -107,3 +107,8 @@ button {
     margin-bottom: 30px; 
 }
 
+.selected {
+    background-color: #ffeb3b;  /* Yellow for selected */
+}
+
+
