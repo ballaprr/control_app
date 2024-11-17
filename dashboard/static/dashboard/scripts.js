@@ -55,17 +55,6 @@ function sendTriggerRequest() {
         body: JSON.stringify(payload)
     })
     .then(response => response.json())
-    .then(data => {
-        if (data.ok) {
-            console.log('Action triggered successfully!');
-            console.log('Action triggered successfully!');
-        } else {
-            console.log('Error:', data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
 }
 
 // CSRF token helper

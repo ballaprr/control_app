@@ -5,9 +5,20 @@ import requests
 import json
 import os
 from django.views.decorators.csrf import csrf_exempt
+from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 
 load_dotenv()
+
+TILE_DEVICE_MAP = {
+    "a": [39265, 39262, 39266, 39264],
+    "b": None,
+    "c": None,
+    "d": [39265, 39262, 39266, 39264, None, None, None],
+    "e": None,
+    "0": [39265, 39262, 39266, 39264, None, None, None, None, None, None, None, None, None, None, None],
+}
+
 
 
 def control_view(request):
@@ -24,16 +35,32 @@ def control_view(request):
 def trigger_action(request):
     if request.method == "POST":
         api_key = os.getenv("API_KEY")
+        tile = "a"
+        payload = "2"
         # Forward the request to the external API
-        url = 'https://info-beamer.com/api/v1/device/39265/node/root/remote/trigger/'
-        payload = {'data': 'a'}
-        try:
-            response = requests.post(url, data=payload, auth=('', api_key))
-            if response.status_code == 200 and response.json().get("ok") == True:
-                return JsonResponse({'ok': True, 'message': 'Action triggered successfully.'})
-            else:
-                return JsonResponse({'ok': False, 'message': 'Failed to trigger action.'})
-        except requests.RequestException as e:
-            return JsonResponse({"error": str(e)}, status=500)
+        if not tile or not payload:
+                return JsonResponse({"error": "Missing tile or payload"}, status=400)
         
-    return JsonResponse({'ok': False, 'message': 'Invalid request method.'})
+        device_ids = TILE_DEVICE_MAP.get(tile)
+        if device_ids is None:
+                return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
+        
+        # 
+        def send_request(device_id):
+            if device_id is None:
+                return None
+            url = f'https://info-beamer.com/api/v1/device/{device_id}/node/root/remote/trigger/'
+            response = requests.post(url, data={"data": payload}, auth=('', api_key))
+            return {"device_id": device_id, "status": response.status_code}
+
+        # Use ThreadPoolExecutor to send requests concurrently
+        with ThreadPoolExecutor() as executor:
+            responses = list(executor.map(send_request, device_ids))
+
+        # Filter out None responses
+        responses = [response for response in responses if response is not None]
+        #
+
+        return JsonResponse({"results": responses}, status=200)
+        
+    return JsonResponse({"error": "Invalid request method"}, status=405)
