@@ -58,6 +58,37 @@ window.onload = function() {
     updateTime(); // Initialize the time
     document.getElementById('first-param').textContent = `First Parameter: ${firstParam}`;
     document.getElementById('second-param').textContent = `Second Parameter: ${secondParam}`;
+    const tileIndices = Array.from({ length: 14 }, (_, index) => index + 1);
+    const fetchPromises = tileIndices.map(tileIndex => {
+        return fetch(`/device-output/${tileIndex}/`) // Adjust endpoint as necessary
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch image for tile ${tileIndex}`);
+                }
+                return response.json(); // Assuming the response is JSON containing a data URL
+            })
+            .then(data => {
+                const tileElement = document.getElementById(`current-tile-${tileIndex}`);
+                if (tileElement && data.src && data.src.startsWith("data:image/")) {
+                    // Apply the image as the tile background
+                    tileElement.style.backgroundImage = `url(${data.src})`;
+                    tileElement.style.backgroundSize = "cover";
+                    tileElement.style.backgroundPosition = "center";
+                } else {
+                    console.error(`Invalid image data for tile ${tileIndex}`);
+                }
+            })
+            .catch(error => console.error(`Error fetching image for tile ${tileIndex}:`, error));
+    });
+
+    // Wait for all fetch requests to complete
+    Promise.all(fetchPromises)
+        .then(() => {
+            console.log("All tiles loaded successfully");
+        })
+        .catch(error => {
+            console.error("Error loading some tiles:", error);
+        });
 };
 
 function applyColors() {
