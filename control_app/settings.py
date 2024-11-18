@@ -24,13 +24,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-xlydeknjvyy1s&^!#!w3al6d52o)5pj&)%c3dfnwpfd9^cqs@_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 # In settings.py
 SECURE_SSL_REDIRECT = False  # Don't redirect to HTTPS in development
 
+STATIC_URL = '/static/'
 
+STATIC_ROOT = '/var/www/html/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'dashboard/static'),  # Point to your dashboard's static directory
+]
 
 # Application definition
 

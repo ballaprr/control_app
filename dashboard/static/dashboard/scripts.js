@@ -1,7 +1,7 @@
 // Store the selected tiles for both current and proposed views
 let keyBuffer = "";
-let firstParam = "";
-let secondParam = null;
+let firstParam = localStorage.getItem("firstParam") || "";
+let secondParam = localStorage.getItem("secondParam") || null;
 
 let selectedTiles = {
     current: null,
@@ -21,6 +21,11 @@ function updateTime() {
 // Call updateTime every 1000 milliseconds (1 second)
 setInterval(updateTime, 1000);
 
+function saveSelectedTiles() {
+    const selectedTilesArray = Array.from(selectedTiles.preview); // Convert the Set to an array
+    localStorage.setItem('selectedTiles', JSON.stringify(selectedTilesArray));
+}
+
 function selectTile(tileIndices) {
     tileIndices.forEach(tileIndex => {
         const previewTile = document.getElementById(`preview-tile-${tileIndex}`);
@@ -32,26 +37,45 @@ function selectTile(tileIndices) {
             selectedTiles.preview.add(tileIndex); // Add tile to the selected set
         }
     });
+
+    saveSelectedTiles();
 }
 
-// Apply the color changes from the proposed view to the current view
+function loadSelectedTiles() {
+    const savedTiles = JSON.parse(localStorage.getItem('selectedTiles')) || [];
+    savedTiles.forEach(tileIndex => {
+        const previewTile = document.getElementById(`preview-tile-${tileIndex}`);
+        if (previewTile) {
+            previewTile.style.backgroundColor = "#ffeb3b"; // Restore color
+            selectedTiles.preview.add(tileIndex); // Restore the set of selected tiles
+        }
+    });
+}
+
+// Call this function when the page loads
+window.onload = function() {
+    loadSelectedTiles(); // Load selected tiles on page load
+    updateTime(); // Initialize the time
+    document.getElementById('first-param').textContent = `First Parameter: ${firstParam}`;
+    document.getElementById('second-param').textContent = `Second Parameter: ${secondParam}`;
+};
+
 function applyColors() {
     for (let i = 1; i <= 14; i++) {
         const previewTile = document.getElementById(`preview-tile-${i}`);
         const currentTile = document.getElementById(`current-tile-${i}`);
 
-        // Apply the color from the proposed tile to the current tile
         currentTile.style.backgroundColor = previewTile.style.backgroundColor;
     }
 }
 
 function sendTriggerRequest(tile, payload) {
 
-    fetch('/trigger-action/', {  // This URL should match the Django view URL
+    fetch('/trigger-action/', { 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken()  // If CSRF protection is enabled
+            'X-CSRFToken': getCsrfToken()
         },
         body: JSON.stringify({
             tile: tile,
@@ -91,6 +115,7 @@ function handleKeyPress(event) {
     console.log(keyBuffer);
     if (['0', 'a', 'b', 'c', 'd', 'e'].includes(keyBuffer)) {
         firstParam = keyBuffer;
+        localStorage.setItem("firstParam", firstParam);
         const tileIndices = keyToTileGroupMap[keyBuffer];
         selectTile(tileIndices);
         // Display first parameter on the UI (can be adapted for your UI framework)
@@ -104,6 +129,7 @@ function handleKeyPress(event) {
     
     if (validSecondParams.includes(keyBuffer)) {
         secondParam = keyBuffer;
+        localStorage.setItem("secondParam", secondParam);
         document.getElementById('second-param').textContent = `Second Parameter: ${secondParam}`;
         console.log("secondParam: ", secondParam);
     }
