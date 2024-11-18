@@ -56,8 +56,8 @@ function loadSelectedTiles() {
 window.onload = function() {
     loadSelectedTiles(); // Load selected tiles on page load
     updateTime(); // Initialize the time
-    document.getElementById('first-param').textContent = `First Parameter: ${firstParam}`;
-    document.getElementById('second-param').textContent = `Second Parameter: ${secondParam}`;
+    document.getElementById('first-param').textContent = `Zone: ${firstParam}`;
+    document.getElementById('second-param').textContent = `Activation: ${secondParam}`;
     const tileIndices = Array.from({ length: 14 }, (_, index) => index + 1);
     const fetchPromises = tileIndices.map(tileIndex => {
         return fetch(`/device-output/${tileIndex}/`) // Adjust endpoint as necessary
