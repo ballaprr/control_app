@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.control_view, name='control_view'),
     path('trigger-action/', views.trigger_action, name='trigger_action'),
+    path('device-output/<int:title_Index>/', views.device_output, name='device_output'),
 ]

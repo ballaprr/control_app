@@ -71,6 +71,15 @@ function applyColors() {
 
 function sendTriggerRequest(tile, payload) {
 
+    const keyToTileGroupMap = {
+        '0': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],  // All tiles
+        'a': [1, 2, 3, 4],    // Tiles A1 to A4
+        'b': [6, 7, 8, 9],    // Tiles A6 to A9
+        'c': [11, 12, 13, 14], // Tiles A11 to A14
+        'd': [1, 2, 3, 4, 5, 6, 7], // Tiles A1 to A7
+        'e': [8, 9, 10, 11, 12, 13, 14] // Tiles A8 to A14
+    };
+
     fetch('/trigger-action/', { 
         method: 'POST',
         headers: {
@@ -78,11 +87,41 @@ function sendTriggerRequest(tile, payload) {
             'X-CSRFToken': getCsrfToken()
         },
         body: JSON.stringify({
-            tile: tile,
-            payload: payload
+            tile: tile, // zone: 0, a, b, c, d, e
+            payload: payload // activation: 1-24
         })
     })
     .then(response => response.json())
+
+    // Call get request over here, for loop in keyToTileGroupMap[tile], recieve image and update the box
+    // 
+    .then(() => {
+        // Iterate through tile indices and fetch images
+        const tileIndices = keyToTileGroupMap[tile] || [];
+        tileIndices.forEach(tileIndex => {
+            fetch(`/device-output/${tileIndex}/`) // Adjust endpoint as necessary
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch image for tile ${tileIndex}`);
+                    }
+                    return response.json(); // Assuming the response is JSON containing a data URL
+                })
+                .then(data => {
+                    const tileElement = document.getElementById(`current-tile-${tileIndex}`);
+                    if (tileElement && data.src && data.src.startsWith("data:image/")) {
+                        // Apply the image as the tile background
+                        tileElement.style.backgroundImage = `url(${data.src})`;
+                        tileElement.style.backgroundSize = "cover";
+                        tileElement.style.backgroundPosition = "center";
+                    } else {
+                        console.error(`Invalid image data for tile ${tileIndex}`);
+                    }
+                })
+                .catch(error => console.error(`Error fetching image for tile ${tileIndex}:`, error));
+        });
+    })
+    .catch(error => console.error("Error with trigger action request:", error));
+
 }
 
 // CSRF token helper

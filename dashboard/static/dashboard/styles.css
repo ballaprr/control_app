@@ -118,4 +118,14 @@ button {
     background-color: #ffeb3b;  /* Yellow for selected */
 }
 
+.tile {
+    width: 100px; /* Adjust based on your layout */
+    height: 100px; /* Adjust based on your layout */
+    border: 1px solid #ccc;
+    background-color: #f9f9f9; /* Fallback color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 

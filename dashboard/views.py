@@ -41,6 +41,24 @@ def control_view(request):
         'tile_range': range(1, 15)      # Send range from 1 to 14 for tiles
     })
 
+def device_output(request, title_Index):
+    try:
+        index = int(title_Index) - 1
+        device_id = TILE_DEVICE_MAP.get("0")[index]
+        if not device_id:
+            return JsonResponse({"error": f"Device id does not exist"}, status=404)
+          
+        response = requests.get(f"https://info-beamer.com/api/v1/device/{device_id}/output", auth=('', os.getenv("API_KEY")))
+        print(response)
+        if response.status_code == 200:
+           return JsonResponse(response.json(), status=200)
+        else:
+            return JsonResponse({"error": f"Failed to get output for device {device_id}"}, status=500)
+            
+    except (ValueError, IndexError):
+        return JsonResponse({"error": "Invalid index"}, status=400)
+
+
 
 @csrf_exempt
 def trigger_action(request):

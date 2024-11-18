@@ -1,0 +1,3 @@
+dashboard/.env
+db.sqlite3
+env/
