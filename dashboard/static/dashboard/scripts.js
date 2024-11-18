@@ -98,7 +98,7 @@ function sendTriggerRequest(tile, payload) {
     .then(() => {
         // Iterate through tile indices and fetch images
         const tileIndices = keyToTileGroupMap[tile] || [];
-        tileIndices.forEach(tileIndex => {
+        const fetchPromises = tileIndices.map(tileIndex => {
             fetch(`/device-output/${tileIndex}/`) // Adjust endpoint as necessary
                 .then(response => {
                     if (!response.ok) {
@@ -119,6 +119,8 @@ function sendTriggerRequest(tile, payload) {
                 })
                 .catch(error => console.error(`Error fetching image for tile ${tileIndex}:`, error));
         });
+
+        return Promise.all(fetchPromises);
     })
     .catch(error => console.error("Error with trigger action request:", error));
 
