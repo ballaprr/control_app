@@ -58,6 +58,21 @@ def device_output(request, title_Index):
     except (ValueError, IndexError):
         return JsonResponse({"error": "Invalid index"}, status=400)
 
+@csrf_exempt
+def reboot_device(request):
+    if request.method == "POST":
+        api_key = os.getenv("API_KEY")
+        data = json.loads(request.body)
+        index = data.get("tile")
+        device_id = TILE_DEVICE_MAP.get("0")[int(index) - 1]
+        if not device_id:
+            return JsonResponse({"error": f"Device id does not exist"}, status=404)
+        
+        response = requests.post(f"https://info-beamer.com/api/v1/device/{device_id}/reboot", auth=('', api_key))
+        if response.status_code == 200:
+            return JsonResponse({"status": "Device rebooted successfully"}, status=200)
+        else:
+            return JsonResponse({"error": "Failed to reboot device"}, status=500)
 
 @csrf_exempt
 def blackscreen(request):

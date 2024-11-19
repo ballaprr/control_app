@@ -2,6 +2,7 @@
 let keyBuffer = "";
 let firstParam = localStorage.getItem("firstParam") || "";
 let secondParam = localStorage.getItem("secondParam") || null;
+let fgSequence = false;
 
 let selectedTiles = {
     preview: new Set()
@@ -170,7 +171,6 @@ function getCsrfToken() {
 }
 
 function handleKeyPress(event) {
-
     if (event.key.length === 1 || event.key === 'Enter') { // Add single characters and Enter key
         keyBuffer += event.key;
     }
@@ -185,6 +185,8 @@ function handleKeyPress(event) {
         'e': [8, 9, 10, 11, 12, 13, 14] // Tiles A8 to A14
     };
     console.log(keyBuffer);
+    console.log(event.key);
+    console.log(fgSequence);
     if (['0', 'a', 'b', 'c', 'd', 'e'].includes(keyBuffer)) {
         firstParam = keyBuffer;
         localStorage.setItem("firstParam", firstParam);
@@ -293,7 +295,19 @@ function handleKeyPress(event) {
         }
     }
 
+    if (event.key === 'f') {
+        fgSequence = true;
+        console.log("f has been triggered")
+        keyBuffer = "";
+        return;
+    }
 
+    if (fgSequence && event.key === 'g') {
+        console.log("Sequence 'f' followed by 'g' detected.");
+        fgSequence = false;
+        const tileNumber = prompt("Enter tile number (e.g., 1, 2, ..., 14):");
+        return;
+    }
     // Apply the color changes when Enter is pressed
     if (event.key === 'Enter') {
         if (firstParam && secondParam) {
