@@ -27,24 +27,24 @@ function saveSelectedTiles() {
 }
 
 function selectTile(tileIndices) {
+    const allTiles = document.querySelectorAll('[id^="preview-tile-"]');
+
+    // Unhighlight all tiles
+    allTiles.forEach(tile => {
+        tile.style.backgroundColor = ""; // Reset background color
+    });
+
+    // Clear the currently selected tiles set
+    selectedTiles.preview.clear();
+
+    // Highlight only the specified tiles
     tileIndices.forEach(tileIndex => {
-        // Get the tile element by its ID
         const previewTile = document.getElementById(`preview-tile-${tileIndex}`);
-        
-        if (!previewTile) {
-            console.warn(`Tile with ID preview-tile-${tileIndex} not found.`);
-            return; // Skip if the tile doesn't exist
-        }
-        
-        // Check if the tile is already selected
-        if (selectedTiles.preview.has(tileIndex)) {
-            // Deselect the tile
-            previewTile.style.backgroundColor = ""; // Reset background color
-            selectedTiles.preview.delete(tileIndex); // Remove from the selected set
-        } else {
-            // Select the tile
+        if (previewTile) {
             previewTile.style.backgroundColor = "#ffeb3b"; // Highlight with yellow
             selectedTiles.preview.add(tileIndex); // Add to the selected set
+        } else {
+            console.warn(`Tile with ID preview-tile-${tileIndex} not found.`);
         }
     });
 
@@ -184,9 +184,6 @@ function handleKeyPress(event) {
         'd': [1, 2, 3, 4, 5, 6, 7], // Tiles A1 to A7
         'e': [8, 9, 10, 11, 12, 13, 14] // Tiles A8 to A14
     };
-    console.log(keyBuffer);
-    console.log(event.key);
-    console.log(fgSequence);
     if (['0', 'a', 'b', 'c', 'd', 'e'].includes(keyBuffer)) {
         firstParam = keyBuffer;
         localStorage.setItem("firstParam", firstParam);
