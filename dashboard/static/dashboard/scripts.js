@@ -213,6 +213,47 @@ function handleKeyPress(event) {
         console.log("secondParam has been cleared.");
     }
 
+    if (event.key === 'm') {
+        console.log("Black screen has been triggered.");
+        fetch('/blackscreen/', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+        })
+        .then(response => response.json())
+
+        .then(() => {
+            // Iterate through tile indices and fetch images
+            const tileIndices = keyToTileGroupMap['0'] || [];
+            const fetchPromises = tileIndices.map(tileIndex => {
+                fetch(`/device-output/${tileIndex}/`) // Adjust endpoint as necessary
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch image for tile ${tileIndex}`);
+                        }
+                        return response.json(); // Assuming the response is JSON containing a data URL
+                    })
+                    .then(data => {
+                        const tileElement = document.getElementById(`current-tile-${tileIndex}`);
+                        if (tileElement && data.src && data.src.startsWith("data:image/")) {
+                            // Apply the image as the tile background
+                            tileElement.style.backgroundImage = `url(${data.src})`;
+                            tileElement.style.backgroundSize = "cover";
+                            tileElement.style.backgroundPosition = "center";
+                        } else {
+                            console.error(`Invalid image data for tile ${tileIndex}`);
+                        }
+                    })
+                    .catch(error => console.error(`Error fetching image for tile ${tileIndex}:`, error));
+            });
+    
+            return Promise.all(fetchPromises);
+        })
+        .catch(error => console.error("Error with trigger action request:", error));
+    }
+
     // Apply the color changes when Enter is pressed
     if (event.key === 'Enter') {
         if (firstParam && secondParam) {

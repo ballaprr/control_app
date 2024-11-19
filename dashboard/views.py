@@ -59,6 +59,24 @@ def device_output(request, title_Index):
         return JsonResponse({"error": "Invalid index"}, status=400)
 
 
+@csrf_exempt
+def blackscreen(request):
+    if request.method == "POST":
+        api_key = os.getenv("API_KEY")
+        device_ids = TILE_DEVICE_MAP.get("0")
+
+        def send_request(device_id):
+            url = f'https://info-beamer.com/api/v1/device/{device_id}/node/root/remote/trigger/'
+            response = requests.post(url, data={"data": "1000"}, auth=('', api_key))
+            return {"device_id": device_id, "status": response.status_code}
+        
+        with ThreadPoolExecutor() as executor:
+                responses = list(executor.map(send_request, device_ids))
+
+        responses = [response for response in responses if response is not None]
+
+        return JsonResponse({"results": responses}, status=200)
+          
 
 @csrf_exempt
 def trigger_action(request):
