@@ -24,4 +24,5 @@ urlpatterns = [
     path('device-output/<int:title_Index>/', views.device_output, name='device_output'),
     path('blackscreen/', views.blackscreen, name='blackscreen'),
     path('get-deviceid/<int:tileIndex>/', views.get_deviceid, name='get_deviceid'),
+    path('reboot-device/', views.reboot_device, name='reboot_device'),
 ]

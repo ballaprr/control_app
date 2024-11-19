@@ -11,12 +11,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TILE_DEVICE_MAP = {
-    "a": [39265, 39262, 39266, 39264],
-    "b": None,
+    "a": None,
+    "b": [39265, 39262, 39266, 39264],
     "c": None,
-    "d": [39265, 39262, 39266, 39264, None, None, None],
-    "e": None,
-    "0": [39265, 39262, 39266, 39264, None, None, None, None, None, None, None, None, None, None, None],
+    "d": [None, None, None, None, None, 39265, 39262],
+    "e": [39266, 39264, None, None, None, None, None],
+    "0": [None, None, None, None, None, 39265, 39262, 39266, 39264, None, None, None, None, None],
 }
 
 payload_map = {

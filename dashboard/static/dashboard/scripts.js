@@ -303,7 +303,17 @@ function handleKeyPress(event) {
         console.log("Sequence 'f' followed by 'g' detected.");
         fgSequence = false;
         const tileNumber = prompt("Enter tile number (e.g., 1, 2, ..., 14):");
-        return;
+        fetch('/reboot-device/', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                tile: tileNumber,
+            })
+        })
+        .then(response => response.json())
     }
     // Apply the color changes when Enter is pressed
     if (event.key === 'Enter') {
