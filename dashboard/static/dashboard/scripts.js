@@ -254,6 +254,46 @@ function handleKeyPress(event) {
         .catch(error => console.error("Error with trigger action request:", error));
     }
 
+    if (event.key == 'i') {
+        const tileNumber = prompt("Enter tile number (e.g., 1, 2, ..., 14):");
+        if (tileNumber && !isNaN(tileNumber)) {
+            const tileIndex = parseInt(tileNumber, 10);
+            if (tileIndex >= 1 && tileIndex <= 14) {
+                console.log(`Tile number ${tileIndex} selected.`);
+            
+                // Call the get_deviceid API
+                fetch(`/get-deviceid/${tileIndex}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(), // Include CSRF token if necessary
+                    },
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Device ID Response:', data);
+                })
+                .catch(error => {
+                    console.error('Error fetching device ID:', error);
+                });
+            } else {
+                alert("Invalid tile number. Please enter a number between 1 and 14.");
+                keyBuffer = ""; // Reset buffer on invalid tile
+                return; // Exit early
+            }
+        } else {
+            alert("Invalid input. Please enter a valid number.");
+            keyBuffer = ""; // Reset buffer on invalid input
+            return; // Exit early
+        }
+    }
+
+
     // Apply the color changes when Enter is pressed
     if (event.key === 'Enter') {
         if (firstParam && secondParam) {

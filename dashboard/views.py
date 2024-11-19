@@ -77,6 +77,24 @@ def blackscreen(request):
 
         return JsonResponse({"results": responses}, status=200)
           
+@csrf_exempt
+def get_deviceid(request, tileIndex):
+    try:
+        api_key = os.getenv("API_KEY")
+        tileIndex = int(tileIndex) - 1
+        device_id = TILE_DEVICE_MAP.get("0")[tileIndex]
+        if not device_id:
+            return JsonResponse({"error": f"Device id does not exist"}, status=404)
+        
+        response = requests.get(f"https://info-beamer.com/api/v1/device/{device_id}/sensor", auth=('', api_key))
+        if response.status_code == 200:
+           return JsonResponse(response.json(), status=200)
+        else:
+            return JsonResponse({"error": f"Failed to get output for device {device_id}"}, status=500)
+            
+    except (ValueError, IndexError):
+        return JsonResponse({"error": "Invalid index"}, status=400)
+
 
 @csrf_exempt
 def trigger_action(request):
