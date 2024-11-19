@@ -4,7 +4,6 @@ let firstParam = localStorage.getItem("firstParam") || "";
 let secondParam = localStorage.getItem("secondParam") || null;
 
 let selectedTiles = {
-    current: null,
     preview: new Set()
 };
 
@@ -28,13 +27,23 @@ function saveSelectedTiles() {
 
 function selectTile(tileIndices) {
     tileIndices.forEach(tileIndex => {
+        // Get the tile element by its ID
         const previewTile = document.getElementById(`preview-tile-${tileIndex}`);
+        
+        if (!previewTile) {
+            console.warn(`Tile with ID preview-tile-${tileIndex} not found.`);
+            return; // Skip if the tile doesn't exist
+        }
+        
+        // Check if the tile is already selected
         if (selectedTiles.preview.has(tileIndex)) {
-            previewTile.style.backgroundColor = ""; // Reset color if already selected
-            selectedTiles.preview.delete(tileIndex); // Remove tile from the selected set
+            // Deselect the tile
+            previewTile.style.backgroundColor = ""; // Reset background color
+            selectedTiles.preview.delete(tileIndex); // Remove from the selected set
         } else {
-            previewTile.style.backgroundColor = "#ffeb3b"; // Yellow for selected
-            selectedTiles.preview.add(tileIndex); // Add tile to the selected set
+            // Select the tile
+            previewTile.style.backgroundColor = "#ffeb3b"; // Highlight with yellow
+            selectedTiles.preview.add(tileIndex); // Add to the selected set
         }
     });
 
@@ -90,15 +99,6 @@ window.onload = function() {
             console.error("Error loading some tiles:", error);
         });
 };
-
-function applyColors() {
-    for (let i = 1; i <= 14; i++) {
-        const previewTile = document.getElementById(`preview-tile-${i}`);
-        const currentTile = document.getElementById(`current-tile-${i}`);
-
-        currentTile.style.backgroundColor = previewTile.style.backgroundColor;
-    }
-}
 
 function sendTriggerRequest(tile, payload) {
 
@@ -191,7 +191,7 @@ function handleKeyPress(event) {
         const tileIndices = keyToTileGroupMap[keyBuffer];
         selectTile(tileIndices);
         // Display first parameter on the UI (can be adapted for your UI framework)
-        document.getElementById('first-param').textContent = `First Parameter: ${firstParam}`;
+        document.getElementById('first-param').textContent = `Zone: ${firstParam}`;
         console.log("firstParam: ", firstParam);
         keyBuffer = "";
     }
@@ -202,14 +202,14 @@ function handleKeyPress(event) {
     if (validSecondParams.includes(keyBuffer)) {
         secondParam = keyBuffer;
         localStorage.setItem("secondParam", secondParam);
-        document.getElementById('second-param').textContent = `Second Parameter: ${secondParam}`;
+        document.getElementById('second-param').textContent = `Activation: ${secondParam}`;
         console.log("secondParam: ", secondParam);
     }
 
     if (event.key === 'z') {
         secondParam = ''; // Clear the second parameter
         keyBuffer = "";
-        document.getElementById('second-param').textContent = `Second Parameter: ${secondParam}`; // Update the UI
+        document.getElementById('second-param').textContent = `Activation: ${secondParam}`; // Update the UI
         console.log("secondParam has been cleared.");
     }
 
@@ -259,7 +259,6 @@ function handleKeyPress(event) {
         if (firstParam && secondParam) {
             console.log("first Prameter enterered: ", firstParam)
             console.log("second Paramter entered: ", secondParam)
-            applyColors();
             sendTriggerRequest(firstParam, secondParam); // Send selected tiles to Django
         }
         keyBuffer = ""; // Clear buffer after Enter
