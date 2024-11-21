@@ -13,10 +13,10 @@ load_dotenv()
 TILE_DEVICE_MAP = {
     "a": [39353, 39354, 39357, 39358],
     "b": [39268, 39269, 39270, 39271],
-    "c": [39274, 39276, 39277, 39278],
-    "d": [39353, 39354, 39357, 39358, 39267, 39268, 39269],
-    "e": [39270, 39271, 39272, 39274, 39276, 39277, 39278],
-    "0": [39353, 39354, 39357, 39358, 39267, 39268, 39269, 39270, 39271, 39272, 39274, 39276, 39277, 39278],
+    "c": [39272, 39274, 39277, 39278],
+    "d": [39353, 39354, 39357, 39358, 39268, 39269],
+    "e": [39270, 39271, 39272, 39274, 39277, 39278],
+    "0": [39353, 39354, 39357, 39358, 39268, 39269, 39270, 39271, 39272, 39274, 39277, 39278],
 }
 
 payload_map = {
@@ -38,7 +38,7 @@ def control_view(request):
 
     return render(request, 'dashboard/index.html', {
         'current_time': current_time,  # Pass the current time to the template
-        'tile_range': range(1, 15)      # Send range from 1 to 14 for tiles
+        'tile_range': range(1, 13)      # Send range from 1 to 14 for tiles
     })
 
 def device_output(request, title_Index):

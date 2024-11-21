@@ -68,7 +68,7 @@ window.onload = function() {
     updateTime(); // Initialize the time
     document.getElementById('first-param').textContent = `Zone: ${firstParam}`;
     document.getElementById('second-param').textContent = `Activation: ${secondParam}`;
-    const tileIndices = Array.from({ length: 14 }, (_, index) => index + 1);
+    const tileIndices = Array.from({ length: 12 }, (_, index) => index + 1);
     const fetchPromises = tileIndices.map(tileIndex => {
         return fetch(`/device-output/${tileIndex}/`) // Adjust endpoint as necessary
             .then(response => {
@@ -104,12 +104,12 @@ window.onload = function() {
 function sendTriggerRequest(tile, payload) {
 
     const keyToTileGroupMap = {
-        '0': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],  // All tiles
+        '0': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  // All tiles
         'a': [1, 2, 3, 4],    // Tiles A1 to A4
-        'b': [6, 7, 8, 9],    // Tiles A6 to A9
-        'c': [11, 12, 13, 14], // Tiles A11 to A14
-        'd': [1, 2, 3, 4, 5, 6, 7], // Tiles A1 to A7
-        'e': [8, 9, 10, 11, 12, 13, 14] // Tiles A8 to A14
+        'b': [5, 6, 7, 8],    // Tiles A6 to A9
+        'c': [9, 10, 11, 12], // Tiles A11 to A14
+        'd': [1, 2, 3, 4, 5, 6], // Tiles A1 to A7
+        'e': [7, 8, 9, 10, 11, 12] // Tiles A8 to A14
     };
 
     fetch('/trigger-action/', { 
@@ -177,12 +177,12 @@ function handleKeyPress(event) {
 
     // Map keypress to tile index (A1 to A14)
     const keyToTileGroupMap = {
-        '0': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],  // All tiles
+        '0': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],  // All tiles
         'a': [1, 2, 3, 4],    // Tiles A1 to A4
-        'b': [6, 7, 8, 9],    // Tiles A6 to A9
-        'c': [11, 12, 13, 14], // Tiles A11 to A14
-        'd': [1, 2, 3, 4, 5, 6, 7], // Tiles A1 to A7
-        'e': [8, 9, 10, 11, 12, 13, 14] // Tiles A8 to A14
+        'b': [5, 6, 7, 8],    // Tiles A6 to A9
+        'c': [9, 10, 11, 12], // Tiles A11 to A14
+        'd': [1, 2, 3, 4, 5, 6], // Tiles A1 to A7
+        'e': [7, 8, 9, 10, 11, 12] // Tiles A8 to A14
     };
     if (['0', 'a', 'b', 'c', 'd', 'e'].includes(keyBuffer)) {
         firstParam = keyBuffer;
@@ -254,10 +254,10 @@ function handleKeyPress(event) {
     }
 
     if (event.key == 'i') {
-        const tileNumber = prompt("Enter tile number (e.g., 1, 2, ..., 14):");
+        const tileNumber = prompt("Enter tile number (e.g., 1, 2, ..., 12):");
         if (tileNumber && !isNaN(tileNumber)) {
             const tileIndex = parseInt(tileNumber, 10);
-            if (tileIndex >= 1 && tileIndex <= 14) {
+            if (tileIndex >= 1 && tileIndex <= 12) {
                 console.log(`Tile number ${tileIndex} selected.`);
             
                 // Call the get_deviceid API
@@ -281,7 +281,7 @@ function handleKeyPress(event) {
                     console.error('Error fetching device ID:', error);
                 });
             } else {
-                alert("Invalid tile number. Please enter a number between 1 and 14.");
+                alert("Invalid tile number. Please enter a number between 1 and 12.");
                 keyBuffer = ""; // Reset buffer on invalid tile
                 return; // Exit early
             }
@@ -302,7 +302,7 @@ function handleKeyPress(event) {
     if (fgSequence && event.key === 'g') {
         console.log("Sequence 'f' followed by 'g' detected.");
         fgSequence = false;
-        const tileNumber = prompt("Enter tile number (e.g., 1, 2, ..., 14):");
+        const tileNumber = prompt("Enter tile number (e.g., 1, 2, ..., 12):");
         fetch('/reboot-device/', { 
             method: 'POST',
             headers: {
