@@ -137,3 +137,15 @@ button {
     background-color: #f9f9f9;
 }
 
+.device-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.device-table th, .device-table td {
+    padding: 8px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+
