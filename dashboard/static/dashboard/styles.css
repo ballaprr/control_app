@@ -128,4 +128,12 @@ button {
     justify-content: center;
 }
 
+#response-display {
+    white-space: pre-wrap;
+    font-family: monospace;
+    padding: 10px;
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+}
 

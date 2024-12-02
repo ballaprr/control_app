@@ -276,6 +276,7 @@ function handleKeyPress(event) {
                 })
                 .then(data => {
                     console.log('Device ID Response:', data);
+                    document.getElementById('device-response').textContent = JSON.stringify(data, null, 2);
                 })
                 .catch(error => {
                     console.error('Error fetching device ID:', error);
