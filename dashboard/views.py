@@ -29,7 +29,6 @@ TILE_DEVICE_MAP = {
 }
 
 
-
 payload_map = {
     "17": ["17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"],
     "18": ["31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44"],
@@ -114,19 +113,12 @@ def get_deviceid(request, tileIndex):
         
         response = requests.get(f"https://info-beamer.com/api/v1/device/{device_id}/sensor", auth=('', api_key))
         response = response.json()
-        """
         response = {'boot_uptime': response['boot']['uptime'], 'cpu idle': response['cpu']['idle'], 'disk available': response['disk']['available'],
                     'disk used': response['disk']['used'], 'fps': response['info_beamer']['fps'], 'info beamer uptime': response['info_beamer']['uptime'],
                     'info beamer version': response['info_beamer']['version'], 'hwids eth0': response['hwids']['eth0'], 'hwids wlan0': response['hwids']['wlan0'],
                     'network data received': response['net']['data']['received'], 'network data sent': response['net']['data']['sent'], 'network ip address': response['net']['ip'], 
-                    'network mac address': response['net']['mac'], 'video hz': response['video']['hz'], 'video resolution': response['video']['response'], 'GPU memory': response['pi']['gpu'],
-                    'ARM/Linux memory': response['pi']['arm'], 'PI hardware revision': response['pi']['revision'], 'PI firmware version': response['pi']['version'], 'PI CPU temperature': response['temp']}
-        """
-        response = {'boot_uptime': response['boot']['uptime'], 'cpu idle': response['cpu']['idle'], 'disk available': response['disk']['available'],
-                    'disk used': response['disk']['used'], 'fps': response['info_beamer']['fps'], 'info beamer uptime': response['info_beamer']['uptime'],
-                    'info beamer version': response['info_beamer']['version'], 'hwids eth0': response['hwids']['eth0'], 'hwids wlan0': response['hwids']['wlan0'],
-                    'network data received': response['net']['data']['received'], 'network data sent': response['net']['data']['sent']}
-        print(response)
+                    'network mac address': response['net']['mac'], 'video hz': response['video']['hz'], 'video resolution': response['video']['resolution'], 'gpu': response['ram']['gpu'],
+                    'gpu_used': response['ram']['gpu_used'], 'gpu arm': response['ram']['arm'], 'revision': response['pi']['revision'], 'PI CPU temperature': response['temp']}
         if response:
            return JsonResponse(response, status=200)
         else:
