@@ -170,6 +170,75 @@ function getCsrfToken() {
     return null;
 }
 
+function formatDataAndDisplay(data) {
+    const units = {
+        "boot_uptime": "seconds",
+        "cpu idle": "%",
+        "disk available": "MB",
+        "disk used": "MB",
+        "fps": "frames/second",
+        "info beamer uptime": "seconds",
+        "network data received": "bytes",
+        "network data sent": "bytes",
+        "PI CPU temperature": "°C",
+        "video hz": "Hz",
+        "video resolution": "",
+        "gpu": "KB",
+        "gpu_used": "KB",
+        "gpu arm": "KB",
+        "network ip address": "",
+        "network mac address": "",
+        "hwids eth0": "",
+        "hwids wlan0": "",
+        "revision": "",
+        "info beamer version": "",
+    };
+
+    const container = document.getElementById("device-response");
+    container.innerHTML = ""; // Clear any existing content
+
+    // Create a table element
+    const table = document.createElement("table");
+    table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
+    table.classList.add('device-table');
+
+    // Create table header
+    const headerRow = document.createElement("tr");
+    const keyHeader = document.createElement("th");
+    keyHeader.textContent = "Key";
+    const valueHeader = document.createElement("th");
+    valueHeader.textContent = "Value";
+    headerRow.appendChild(keyHeader);
+    headerRow.appendChild(valueHeader);
+    table.appendChild(headerRow);
+
+    // Add data rows
+    for (const [key, value] of Object.entries(data)) {
+        const unit = units[key] || ""; // Get the unit for the key or default to empty
+        const formattedValue = `${value} ${unit}`.trim();
+
+        const row = document.createElement("tr");
+
+        const keyCell = document.createElement("td");
+        keyCell.textContent = key;
+        keyCell.style.border = "1px solid #ccc";
+        keyCell.style.padding = "8px";
+
+        const valueCell = document.createElement("td");
+        valueCell.textContent = formattedValue;
+        valueCell.style.border = "1px solid #ccc";
+        valueCell.style.padding = "8px";
+
+        row.appendChild(keyCell);
+        row.appendChild(valueCell);
+        table.appendChild(row);
+    }
+
+    // Append the table to the container
+    container.appendChild(table);
+}
+
 function handleKeyPress(event) {
     if (event.key.length === 1 || event.key === 'Enter') { // Add single characters and Enter key
         keyBuffer += event.key;
@@ -276,6 +345,8 @@ function handleKeyPress(event) {
                 })
                 .then(data => {
                     console.log('Device ID Response:', data);
+                    // document.getElementById('device-response').textContent = JSON.stringify(data, null, 2);
+                    formatDataAndDisplay(data);
                 })
                 .catch(error => {
                     console.error('Error fetching device ID:', error);

@@ -10,6 +10,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+TILE_DEVICE_MAP = {
+    "a": [None, None, None, None],
+    "b": [39265, 39262, 39266, 39264], 
+    "c": [None, None, None, None],
+    "0": [None, None, None, None, 39265, 39262, 39266, 39264, None, None, None, None]
+}
+"""
+
 TILE_DEVICE_MAP = {
     "a": [39353, 39354, 39357, 39358],
     "b": [39268, 39269, 39270, 39271],
@@ -18,6 +27,7 @@ TILE_DEVICE_MAP = {
     "e": [39270, 39271, 39272, 39274, 39277, 39278],
     "0": [39353, 39354, 39357, 39358, 39268, 39269, 39270, 39271, 39272, 39274, 39277, 39278],
 }
+"""
 
 payload_map = {
     "17": ["17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"],
@@ -102,8 +112,15 @@ def get_deviceid(request, tileIndex):
             return JsonResponse({"error": f"Device id does not exist"}, status=404)
         
         response = requests.get(f"https://info-beamer.com/api/v1/device/{device_id}/sensor", auth=('', api_key))
-        if response.status_code == 200:
-           return JsonResponse(response.json(), status=200)
+        response = response.json()
+        response = {'boot_uptime': response['boot']['uptime'], 'cpu idle': response['cpu']['idle'], 'disk available': response['disk']['available'],
+                    'disk used': response['disk']['used'], 'fps': response['info_beamer']['fps'], 'info beamer uptime': response['info_beamer']['uptime'],
+                    'info beamer version': response['info_beamer']['version'], 'hwids eth0': response['hwids']['eth0'], 'hwids wlan0': response['hwids']['wlan0'],
+                    'network data received': response['net']['data']['received'], 'network data sent': response['net']['data']['sent'], 'network ip address': response['net']['ip'], 
+                    'network mac address': response['net']['mac'], 'video hz': response['video']['hz'], 'video resolution': response['video']['resolution'], 'gpu': response['ram']['gpu'],
+                    'gpu_used': response['ram']['gpu_used'], 'gpu arm': response['ram']['arm'], 'revision': response['pi']['revision'], 'PI CPU temperature': response['temp']}
+        if response:
+           return JsonResponse(response, status=200)
         else:
             return JsonResponse({"error": f"Failed to get output for device {device_id}"}, status=500)
             
