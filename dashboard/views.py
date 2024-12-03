@@ -43,6 +43,39 @@ payload_map = {
 }
 
 
+def legend_view(request):
+    # Get api for setup details (gets assett list and triggers)  : https://info-beamer.com/api/v1/setup/254745/    
+        # response["config"]["schedules"]["pages"]["tiles"]["asset"]  - assett id
+        # response["config"]["schedules"]["pages"]["interaction"]["remote"] - trigger id
+
+    api_1_url = 'https://info-beamer.com/api/v1/setup/254745/'
+    try:
+        response_1 = requests.get(api_1_url, auth=('', os.getenv("API_KEY")))
+        response_1.raise_for_status()
+        data_1 = response_1.json()
+
+        asset_id = data_1["config"][""]["schedules"]["pages"]["tiles"]["asset"]
+        trigger = data_1["config"][""]["schedules"]["pages"]["interaction"]["remote"]
+        print("Data 1 Config:", data_1.get("config"))
+
+        triggers_data = [{"asset_id": asset_id, "trigger": trigger}]
+    except requests.exceptions.RequestException as e:
+        triggers_data = []
+
+    # Get api for listing assetts (gets images) : https://info-beamer.com/api/v1/asset/list
+        # ["assets"]["id"] - gets the assett id
+        # ["assets"]["thumb"] - gets the image
+
+    api_2_url = 'https://info-beamer.com/api/v1/asset/list'
+    try:
+        response_2 = request.get(api_2_url)
+        response_2.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        assets_data = []
+
+
+    pass
+
 
 def control_view(request):
     # Get current time in military format (HH:MM:SS)

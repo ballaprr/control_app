@@ -25,4 +25,5 @@ urlpatterns = [
     path('blackscreen/', views.blackscreen, name='blackscreen'),
     path('get-deviceid/<int:tileIndex>/', views.get_deviceid, name='get_deviceid'),
     path('reboot-device/', views.reboot_device, name='reboot_device'),
+    path('legend/', views.legend_view, name='legend_view'),
 ]
