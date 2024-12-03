@@ -15,6 +15,8 @@ TILE_DEVICE_MAP = {
     "a": [None, None, None, None],
     "b": [39265, 39262, 39266, 39264], 
     "c": [None, None, None, None],
+    "d": [None, None, None, None, 39265, 39262],
+    "e": [39266, 39264, None, None, None, None],
     "0": [None, None, None, None, 39265, 39262, 39266, 39264, None, None, None, None]
 }
 """

@@ -361,6 +361,7 @@ function handleKeyPress(event) {
             keyBuffer = ""; // Reset buffer on invalid input
             return; // Exit early
         }
+        keyBuffer = ""; 
     }
 
     if (event.key === 'f') {
