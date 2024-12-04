@@ -155,38 +155,9 @@ button {
     transform:rotate(-90deg);
 }
 
-/* Style for centering the table container */
 .table-container {
-    display: flex;             /* Use flexbox for centering */
-    justify-content: center;   /* Horizontally center the table */
-    align-items: center;       /* Vertically center the table (if needed) */
-    margin: 0 auto;            /* Ensure the container is centered */
-    max-width: 100%;           /* Prevent overflowing */
-    overflow-x: auto;          /* Allow horizontal scrolling if necessary */
-    overflow-y: auto;
-}
-
-/* Ensure the table takes up only the required space */
-.table-container table {
-    border-collapse: collapse;
-    margin: 0;                 /* Remove default margin */
-    text-align: center;        /* Center-align text inside the table */
-    width: auto;               /* Use only as much space as needed */
-}
-
-/* Optional: Style the table for a cleaner look */
-.table-container table th,
-.table-container table td {
-    padding: 8px 12px;
-    border: 1px solid #ddd;    /* Add borders */
-}
-
-.table-container table tr:nth-child(even) {
-    background-color: #f9f9f9; /* Alternating row color */
-}
-
-.table-container table tr:hover {
-    background-color: #f1f1f1; /* Highlight row on hover */
+    overflow-x: auto;
+    margin-top: 20px;
 }
 
 
