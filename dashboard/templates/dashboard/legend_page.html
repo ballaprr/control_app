@@ -12,25 +12,26 @@
     <button onclick="location.href='/'" style="padding:10px 20px;">Back to Control App</button>
 
     <table border="1">
-        <thead>
-            <tr>
-                <th>Trigger</th>
-                <th>Thumbnail</th>
-            </tr>
-        </thead>
         <tbody>
-            {% for item in output_data %}
+            <!-- Render triggers row -->
             <tr>
-                <td>{{ item.trigger }}</td>
-                <td>
-                    {% if item.thumb %}
-                    <img src="{{ item.thumb }}" alt="Thumbnail" style="width:100px;height:auto;">
-                    {% else %}
-                    No thumbnail available
-                    {% endif %}
-                </td>
+                {% for item in output_data %}
+                    <th>{{ item.trigger }}</th>
+                {% endfor %}
             </tr>
-            {% endfor %}
+            
+            <!-- Render thumbnails row -->
+            <tr>
+                {% for item in output_data %}
+                    <td>
+                        {% if item.thumb %}
+                            <img src="{{ item.thumb }}" alt="Thumbnail" style="width:100px;height:auto;">
+                        {% else %}
+                            No thumbnail available
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
         </tbody>
     </table>
 </body>
