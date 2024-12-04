@@ -44,37 +44,44 @@ payload_map = {
 
 
 def legend_view(request):
-    # Get api for setup details (gets assett list and triggers)  : https://info-beamer.com/api/v1/setup/254745/    
-        # response["config"]["schedules"]["pages"]["tiles"]["asset"]  - assett id
-        # response["config"]["schedules"]["pages"]["interaction"]["remote"] - trigger id
-
     api_1_url = 'https://info-beamer.com/api/v1/setup/254745/'
+    output_data = []
     try:
         response_1 = requests.get(api_1_url, auth=('', os.getenv("API_KEY")))
         response_1.raise_for_status()
         data_1 = response_1.json()
+        for schedule in data_1["config"][""]["schedules"]:
+            for page in schedule.get("pages", []):
+                interaction = page.get("interaction", {})
+                trigger = interaction.get("remote")
+                for tile in page.get("tiles", []):
+                    asset_id = tile.get("asset")
+                    output_data.append({
+                        "trigger": trigger,
+                        "asset_id": asset_id
+                    })
 
-        asset_id = data_1["config"][""]["schedules"]["pages"]["tiles"]["asset"]
-        trigger = data_1["config"][""]["schedules"]["pages"]["interaction"]["remote"]
-        print("Data 1 Config:", data_1.get("config"))
-
-        triggers_data = [{"asset_id": asset_id, "trigger": trigger}]
     except requests.exceptions.RequestException as e:
-        triggers_data = []
-
-    # Get api for listing assetts (gets images) : https://info-beamer.com/api/v1/asset/list
-        # ["assets"]["id"] - gets the assett id
-        # ["assets"]["thumb"] - gets the image
+        output_data = []
 
     api_2_url = 'https://info-beamer.com/api/v1/asset/list'
     try:
-        response_2 = request.get(api_2_url)
+        response_2 = requests.get(api_2_url, auth=('', os.getenv("API_KEY")))
         response_2.raise_for_status()
+        data_2 = response_2.json()
+        assets_data = data_2.get("assets", [])
     except requests.exceptions.RequestException as e:
         assets_data = []
 
+    for item in output_data:
+        asset_id = item["asset_id"]
+        for asset in assets_data:
+            if asset["id"] == asset_id:
+                item["thumb"] = asset.get("thumb")
+                break
 
-    pass
+
+    return JsonResponse(output_data, status=200, safe=False)
 
 
 def control_view(request):
