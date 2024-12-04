@@ -81,7 +81,7 @@ def legend_view(request):
                 break
 
 
-    return JsonResponse(output_data, status=200, safe=False)
+    return render(request, 'dashboard/legend_page.html', {"output_data": output_data})
 
 
 def control_view(request):
