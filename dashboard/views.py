@@ -43,7 +43,7 @@ payload_map = {
 }
 
 
-def legend_view(request):
+def fetch_legend_data(request):
     api_1_url = 'https://info-beamer.com/api/v1/setup/254745/'
     output_data = []
     try:
@@ -80,7 +80,11 @@ def legend_view(request):
                 item["thumb"] = asset.get("thumb")
                 break
 
+    return output_data
 
+
+def legend_view(request):
+    output_data = fetch_legend_data(request)
     return render(request, 'dashboard/legend_page.html', {"output_data": output_data})
 
 
