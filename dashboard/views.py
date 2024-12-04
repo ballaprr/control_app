@@ -91,8 +91,9 @@ def legend_view(request):
 def control_view(request):
     # Get current time in military format (HH:MM:SS)
     current_time = now().strftime("%H:%M:%S")  # Ensures military time format
-
+    output_data = fetch_legend_data(request)
     return render(request, 'dashboard/index.html', {
+        'output_data': output_data,       # Pass the output data to the template
         'current_time': current_time,  # Pass the current time to the template
         'tile_range': range(1, 13)      # Send range from 1 to 14 for tiles
     })

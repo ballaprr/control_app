@@ -43,6 +43,35 @@
                 {% endfor %}
             </div>
         </section>
+        
+        <section id="legend-view">
+            <h2>Legend</h2>
+            <div class ="table-container">
+                <table border="1">
+                    <tbody>
+                        <!-- Render triggers row -->
+                        <tr>
+                            {% for item in output_data %}
+                                <th>{{ item.trigger }}</th>
+                            {% endfor %}
+                        </tr>
+                        
+                        <!-- Render thumbnails row -->
+                        <tr>
+                            {% for item in output_data %}
+                                <td>
+                                    {% if item.thumb %}
+                                        <img src="{{ item.thumb }}" alt="Thumbnail" style="width:100px;height:auto;">
+                                    {% else %}
+                                        No thumbnail available
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
         <section>
             <h2> Device Id details </h2>
