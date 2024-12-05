@@ -406,5 +406,56 @@ function handleKeyPress(event) {
 // Listen for key press events
 document.addEventListener('keydown', handleKeyPress);
 
+document.addEventListener('DOMContentLoaded', function () {
+    const refreshButton = document.getElementById('refresh-legend');
+    refreshButton.addEventListener('click', function () {
+        fetchLegendData();
+    });
+});
+
+function fetchLegendData() {
+    fetch('/fetch-legend-data/')
+        .then(response => response.json())
+        .then(data => updateLegendTable(data))
+        .catch(error => console.error('Error:', error));
+}
+
+function updateLegendTable(data) {
+    const tableBody = document.getElementById('legend-table-body');
+
+    // Clear the existing table content
+    tableBody.innerHTML = '';
+
+    // Create new rows
+    const triggersRow = document.createElement('tr');
+    const thumbnailsRow = document.createElement('tr');
+
+    data.forEach(item => {
+        // Create trigger cell
+        const triggerCell = document.createElement('th');
+        triggerCell.textContent = item.trigger;
+        triggersRow.appendChild(triggerCell);
+
+        // Create thumbnail cell
+        const thumbnailCell = document.createElement('td');
+        if (item.thumb) {
+            const img = document.createElement('img');
+            img.src = item.thumb;
+            img.alt = 'Thumbnail';
+            img.style.width = '100px';
+            img.style.height = 'auto';
+            thumbnailCell.appendChild(img);
+        } else {
+            thumbnailCell.textContent = 'No thumbnail available';
+        }
+        thumbnailsRow.appendChild(thumbnailCell);
+    });
+
+    // Append new rows to the table body
+    tableBody.appendChild(triggersRow);
+    tableBody.appendChild(thumbnailsRow);
+}
+
+
 // Initialize the time when the page loads
 updateTime();

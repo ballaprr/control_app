@@ -98,6 +98,10 @@ def control_view(request):
         'tile_range': range(1, 13)      # Send range from 1 to 14 for tiles
     })
 
+def fetch_legend_data_api(request):
+    output_data = fetch_legend_data(request)
+    return JsonResponse(output_data, safe=False)
+
 def device_output(request, title_Index):
     try:
         index = int(title_Index) - 1
@@ -139,7 +143,7 @@ def blackscreen(request):
 
         def send_request(device_id):
             url = f'https://info-beamer.com/api/v1/device/{device_id}/node/root/remote/trigger/'
-            response = requests.post(url, data={"data": "1000"}, auth=('', api_key))
+            response = requests.post(url, data={"data": "m"}, auth=('', api_key))
             return {"device_id": device_id, "status": response.status_code}
         
         with ThreadPoolExecutor() as executor:

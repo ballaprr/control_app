@@ -48,7 +48,7 @@
             <h2>Legend</h2>
             <div class ="table-container">
                 <table border="1">
-                    <tbody>
+                    <tbody id="legend-table-body">
                         <!-- Render triggers row -->
                         <tr>
                             {% for item in output_data %}
@@ -71,6 +71,7 @@
                     </tbody>
                 </table>
             </div>
+            <button id="refresh-legend">Update Legend</button>
         </section>
 
         <section>
