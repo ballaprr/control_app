@@ -403,14 +403,14 @@ function handleKeyPress(event) {
     }
 }
 
-// Listen for key press events
-document.addEventListener('keydown', handleKeyPress);
-
 document.addEventListener('DOMContentLoaded', function () {
     const refreshButton = document.getElementById('refresh-legend');
     refreshButton.addEventListener('click', function () {
         fetchLegendData();
     });
+
+    // Listen for key press events
+    document.addEventListener('keydown', handleKeyPress);
 });
 
 function fetchLegendData() {
