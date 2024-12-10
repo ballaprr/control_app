@@ -28,16 +28,21 @@ function saveSelectedTiles() {
 
 function selectTile(tileIndices) {
     const allTiles = document.querySelectorAll('[id^="preview-tile-"]');
+    const secondParam = localStorage.getItem("secondParam");
+    const legendData = JSON.parse(localStorage.getItem('legendData')) || [];
 
     // Unhighlight all tiles
     allTiles.forEach(tile => {
         tile.style.backgroundColor = ""; // Reset background color
+        tile.style.backgroundImage = '';
     });
 
     // Clear the currently selected tiles set
     selectedTiles.preview.clear();
 
+    const filteredLegendData = legendData.filter(item => item.trigger === secondParam);
     // Display images for selected tiles
+    /*
     tileIndices.forEach(tileIndex => {
         const previewTile = document.getElementById(`preview-tile-${tileIndex}`);
         if (previewTile) {
@@ -45,6 +50,33 @@ function selectTile(tileIndices) {
             selectedTiles.preview.add(tileIndex); // Add to the selected set
         } else {
             console.warn(`Tile with ID preview-tile-${tileIndex} not found.`);
+        }
+    });
+    */
+   console.log("tileIndices: ", tileIndices);
+    tileIndices.forEach((tileIndex, idx) => {
+        // Use index + 1 to map to tile indices if needed
+        // const tileIndex = savedTiles[index] || (index + 1); // Fallback to index + 1 if savedTiles doesn't have the index
+        const previewTile = document.getElementById(`preview-tile-${tileIndex}`);
+
+        if (previewTile) {
+            // Use the current index to find the corresponding thumbnail in filteredLegendData
+            const legendItem = filteredLegendData[idx % filteredLegendData.length]; // Cycle through legend data if more tiles than data
+            
+            if (legendItem && legendItem.thumb) {
+                previewTile.style.backgroundImage = `url(${legendItem.thumb})`;
+                previewTile.style.backgroundSize = 'cover';
+                previewTile.style.backgroundPosition = 'center';
+            } else {
+                previewTile.style.backgroundColor = '#ffeb3b'; // Fallback color
+                previewTile.style.backgroundImage = '';
+                console.log(`No thumbnail available for trigger: ${legendItem?.trigger}`);
+            }
+
+            // Optionally, store the tile index as selected
+            selectedTiles.preview.add(tileIndex);
+        } else {
+            console.log(`Tile element with ID preview-tile-${tileIndex} not found.`);
         }
     });
 
