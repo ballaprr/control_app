@@ -341,6 +341,9 @@ function handleKeyPress(event) {
         localStorage.setItem("secondParam", secondParam);
         document.getElementById('second-param').textContent = `Activation: ${secondParam}`;
         console.log("secondParam: ", secondParam);
+
+        const titleIndices = [...selectedTiles.preview]; // Convert the Set to an array
+        selectTile(titleIndices); // Update the preview tiles
     }
 
     if (event.key === 'z') {
