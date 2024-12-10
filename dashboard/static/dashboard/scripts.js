@@ -37,7 +37,7 @@ function selectTile(tileIndices) {
     // Clear the currently selected tiles set
     selectedTiles.preview.clear();
 
-    // Highlight only the specified tiles
+    // Display images for selected tiles
     tileIndices.forEach(tileIndex => {
         const previewTile = document.getElementById(`preview-tile-${tileIndex}`);
         if (previewTile) {
@@ -51,8 +51,16 @@ function selectTile(tileIndices) {
     saveSelectedTiles();
 }
 
+// set selected tiles for according activation image
 function loadSelectedTiles() {
     const savedTiles = JSON.parse(localStorage.getItem('selectedTiles')) || [];
+    const legendData = JSON.parse(localStorage.getItem('legendData')) || [];
+    const secondParam = localStorage.getItem("secondParam");
+
+    console.log("savedTiles: ", savedTiles);
+
+    const filteredLegendData = legendData.filter(item => item.trigger === secondParam);
+    /*
     savedTiles.forEach(tileIndex => {
         const previewTile = document.getElementById(`preview-tile-${tileIndex}`);
         if (previewTile) {
@@ -60,12 +68,40 @@ function loadSelectedTiles() {
             selectedTiles.preview.add(tileIndex); // Restore the set of selected tiles
         }
     });
+    */
+   console.log("filteredLegendData: ", filteredLegendData);
+    savedTiles.forEach((tileIndex, idx) => {
+        // Use index + 1 to map to tile indices if needed
+        // const tileIndex = savedTiles[index] || (index + 1); // Fallback to index + 1 if savedTiles doesn't have the index
+        const previewTile = document.getElementById(`preview-tile-${tileIndex}`);
+
+        if (previewTile) {
+            // Use the current index to find the corresponding thumbnail in filteredLegendData
+            const legendItem = filteredLegendData[idx % filteredLegendData.length]; // Cycle through legend data if more tiles than data
+            
+            if (legendItem && legendItem.thumb) {
+                previewTile.style.backgroundImage = `url(${legendItem.thumb})`;
+                previewTile.style.backgroundSize = 'cover';
+                previewTile.style.backgroundPosition = 'center';
+            } else {
+                previewTile.style.backgroundColor = '#ffeb3b'; // Fallback color
+                console.log(`No thumbnail available for trigger: ${legendItem?.trigger}`);
+            }
+
+            // Optionally, store the tile index as selected
+            selectedTiles.preview.add(tileIndex);
+        } else {
+            console.log(`Tile element with ID preview-tile-${tileIndex} not found.`);
+        }
+    });
 }
 
 // Call this function when the page loads
+// save legend data to local storage
 window.onload = function() {
     loadSelectedTiles(); // Load selected tiles on page load
     updateTime(); // Initialize the time
+    loadLegendTableFromStorage(); // Load legend data from local storage
     document.getElementById('first-param').textContent = `Zone: ${firstParam}`;
     document.getElementById('second-param').textContent = `Activation: ${secondParam}`;
     const tileIndices = Array.from({ length: 12 }, (_, index) => index + 1);
@@ -267,6 +303,7 @@ function handleKeyPress(event) {
     // Handle second parameter
     const validSecondParams = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'];
     
+    // set preview tiles based off secondParam
     if (validSecondParams.includes(keyBuffer)) {
         secondParam = keyBuffer;
         localStorage.setItem("secondParam", secondParam);
@@ -420,8 +457,22 @@ function fetchLegendData() {
         .catch(error => console.error('Error:', error));
 }
 
+function loadLegendTableFromStorage() {
+    const savedData = localStorage.getItem('legendData');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        updateLegendTable(data);
+    } else {
+        console.log('No legend data found in localStorage.');
+    }
+}
+
+
+// save legend data asynchronously
 function updateLegendTable(data) {
     const tableBody = document.getElementById('legend-table-body');
+
+    localStorage.setItem('legendData', JSON.stringify(data));
 
     // Clear the existing table content
     tableBody.innerHTML = '';

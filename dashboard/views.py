@@ -83,11 +83,8 @@ def fetch_legend_data(request):
     return output_data
 
 
-def legend_view(request):
-    output_data = fetch_legend_data(request)
-    return render(request, 'dashboard/legend_page.html', {"output_data": output_data})
 
-
+# function is called when page is reloaded
 def control_view(request):
     # Get current time in military format (HH:MM:SS)
     current_time = now().strftime("%H:%M:%S")  # Ensures military time format
