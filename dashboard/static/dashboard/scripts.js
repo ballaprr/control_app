@@ -62,6 +62,8 @@ function selectTile(tileIndices) {
         if (previewTile) {
             // Use the current index to find the corresponding thumbnail in filteredLegendData
             const legendItem = filteredLegendData[idx % filteredLegendData.length]; // Cycle through legend data if more tiles than data
+            console.log(legendItem)
+
             
             if (legendItem && legendItem.thumb) {
                 previewTile.style.backgroundImage = `url(${legendItem.thumb})`;
@@ -110,7 +112,7 @@ function loadSelectedTiles() {
         if (previewTile) {
             // Use the current index to find the corresponding thumbnail in filteredLegendData
             const legendItem = filteredLegendData[idx % filteredLegendData.length]; // Cycle through legend data if more tiles than data
-            
+            console.log(legendItem)
             if (legendItem && legendItem.thumb) {
                 previewTile.style.backgroundImage = `url(${legendItem.thumb})`;
                 previewTile.style.backgroundSize = 'cover';
@@ -516,10 +518,17 @@ function updateLegendTable(data) {
     const triggersRow = document.createElement('tr');
     const thumbnailsRow = document.createElement('tr');
 
+    const triggersToReplace = ['59', '60', '61', '62'];
+
     data.forEach(item => {
         // Create trigger cell
         const triggerCell = document.createElement('th');
-        triggerCell.textContent = item.trigger;
+        // Replace trigger value if it matches the specified triggers
+        if (triggersToReplace.includes(String(item.trigger))) {
+            triggerCell.textContent = '20';
+        } else {
+            triggerCell.textContent = item.trigger;
+        }
         triggersRow.appendChild(triggerCell);
 
         // Create thumbnail cell
