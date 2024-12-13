@@ -50,7 +50,13 @@
                         <!-- Render triggers row -->
                         <tr>
                             {% for item in output_data %}
-                                <th>{{ item.trigger }}</th>
+                                <th>
+                                    {% if item.trigger|stringformat:"s" in triggers_to_replace %}
+                                        20
+                                    {% else %}
+                                        {{ item.trigger }}
+                                    {% endif %}
+                                </th>
                             {% endfor %}
                         </tr>
                         

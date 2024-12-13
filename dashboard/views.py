@@ -12,12 +12,12 @@ load_dotenv()
 
 
 TILE_DEVICE_MAP = {
-    "a": [None, None, None, None],
+    "a": [39353, 39354, None, None],
     "b": [39265, 39262, 39266, 39264], 
     "c": [None, None, None, None],
     "d": [None, None, None, None, 39265, 39262],
     "e": [39266, 39264, None, None, None, None],
-    "0": [None, None, None, None, 39265, 39262, 39266, 39264, None, None, None, None]
+    "0": [39353, 39354, None, None, 39265, 39262, 39266, 39264, None, None, None, None]
 }
 """
 
@@ -44,6 +44,7 @@ payload_map = {
 
 
 def fetch_legend_data(request):
+    # first output_data has the trigger & asset_id
     api_1_url = 'https://info-beamer.com/api/v1/setup/254745/'
     output_data = []
     try:
@@ -64,6 +65,7 @@ def fetch_legend_data(request):
     except requests.exceptions.RequestException as e:
         output_data = []
 
+    # second output_data includes thumb
     api_2_url = 'https://info-beamer.com/api/v1/asset/list'
     try:
         response_2 = requests.get(api_2_url, auth=('', os.getenv("API_KEY")))
@@ -87,12 +89,14 @@ def fetch_legend_data(request):
 # function is called when page is reloaded
 def control_view(request):
     # Get current time in military format (HH:MM:SS)
+    triggers_to_replace = ['59', '60', '61', '62']
     current_time = now().strftime("%H:%M:%S")  # Ensures military time format
     output_data = fetch_legend_data(request)
     return render(request, 'dashboard/index.html', {
         'output_data': output_data,       # Pass the output data to the template
         'current_time': current_time,  # Pass the current time to the template
-        'tile_range': range(1, 13)      # Send range from 1 to 14 for tiles
+        'tile_range': range(1, 13),      # Send range from 1 to 14 for tiles
+        'triggers_to_replace': triggers_to_replace,
     })
 
 def fetch_legend_data_api(request):
