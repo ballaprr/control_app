@@ -30,7 +30,6 @@ function selectTile(tileIndices) {
     const allTiles = document.querySelectorAll('[id^="preview-tile-"]');
     const secondParam = localStorage.getItem("secondParam");
     const legendData = JSON.parse(localStorage.getItem('legendData')) || [];
-
     // Unhighlight all tiles
     allTiles.forEach(tile => {
         tile.style.backgroundColor = ""; // Reset background color
@@ -41,6 +40,7 @@ function selectTile(tileIndices) {
     selectedTiles.preview.clear();
 
     const filteredLegendData = legendData.filter(item => item.trigger === secondParam);
+    console.log(filteredLegendData)
     // Display images for selected tiles
     /*
     tileIndices.forEach(tileIndex => {
@@ -54,6 +54,7 @@ function selectTile(tileIndices) {
     });
     */
    console.log("tileIndices: ", tileIndices);
+   console.log("filteredLegendData: ", filteredLegendData);
     tileIndices.forEach((tileIndex, idx) => {
         // Use index + 1 to map to tile indices if needed
         // const tileIndex = savedTiles[index] || (index + 1); // Fallback to index + 1 if savedTiles doesn't have the index
@@ -90,7 +91,6 @@ function loadSelectedTiles() {
     const savedTiles = JSON.parse(localStorage.getItem('selectedTiles')) || [];
     const legendData = JSON.parse(localStorage.getItem('legendData')) || [];
     const secondParam = localStorage.getItem("secondParam");
-
     console.log("savedTiles: ", savedTiles);
 
     const filteredLegendData = legendData.filter(item => item.trigger === secondParam);
@@ -351,8 +351,11 @@ function handleKeyPress(event) {
     if (event.key === 'z') {
         secondParam = ''; // Clear the second parameter
         keyBuffer = "";
+        localStorage.setItem("secondParam", secondParam);
         document.getElementById('second-param').textContent = `Activation: ${secondParam}`; // Update the UI
         console.log("secondParam has been cleared.");
+        const titleIndices = [...selectedTiles.preview]; // Convert the Set to an array
+        selectTile(titleIndices);
     }
 
     if (event.key === 'm') {
@@ -553,4 +556,5 @@ function updateLegendTable(data) {
 
 
 // Initialize the time when the page loads
+
 updateTime();
