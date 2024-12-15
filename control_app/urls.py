@@ -25,5 +25,5 @@ urlpatterns = [
     path('blackscreen/', views.blackscreen, name='blackscreen'),
     path('get-deviceid/<int:tileIndex>/', views.get_deviceid, name='get_deviceid'),
     path('reboot-device/', views.reboot_device, name='reboot_device'),
-    path('fetch-legend-data/', views.fetch_legend_data_api, name='fetch_legend_data_api'),
+    path('fetch-legend-data/<int:setup_id>/', views.fetch_legend_data_api, name='fetch_legend_data'),
 ]

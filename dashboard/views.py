@@ -43,10 +43,13 @@ payload_map = {
 }
 
 
-def fetch_legend_data(request):
+def fetch_legend_data(request, setup_id):
     # first output_data has the trigger & asset_id
-    api_1_url = 'https://info-beamer.com/api/v1/setup/254745/'
+    # setup_id = request.GET.get("setup_id", 254745)
+    print("check")
+    api_1_url = 'https://info-beamer.com/api/v1/setup/' + str(setup_id) + '/'
     output_data = []
+    print(api_1_url)
     try:
         response_1 = requests.get(api_1_url, auth=('', os.getenv("API_KEY")))
         response_1.raise_for_status()
@@ -82,6 +85,7 @@ def fetch_legend_data(request):
                 item["thumb"] = asset.get("thumb")
                 break
 
+    print(output_data)
     return output_data
 
 
@@ -91,7 +95,7 @@ def control_view(request):
     # Get current time in military format (HH:MM:SS)
     triggers_to_replace = ['59', '60', '61', '62']
     current_time = now().strftime("%H:%M:%S")  # Ensures military time format
-    output_data = fetch_legend_data(request)
+    output_data = fetch_legend_data(request, 254745)
     return render(request, 'dashboard/index.html', {
         'output_data': output_data,       # Pass the output data to the template
         'current_time': current_time,  # Pass the current time to the template
@@ -99,8 +103,8 @@ def control_view(request):
         'triggers_to_replace': triggers_to_replace,
     })
 
-def fetch_legend_data_api(request):
-    output_data = fetch_legend_data(request)
+def fetch_legend_data_api(request, setup_id):
+    output_data = fetch_legend_data(request, setup_id)
     return JsonResponse(output_data, safe=False)
 
 def device_output(request, title_Index):

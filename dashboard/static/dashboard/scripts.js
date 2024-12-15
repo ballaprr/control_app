@@ -491,7 +491,10 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function fetchLegendData() {
-    fetch('/fetch-legend-data/')
+    const setupDropdown = document.getElementById('setup-dropdown');
+    const selectedSetupId = setupDropdown.value;
+    console.log('Selected setup ID:', selectedSetupId);
+    fetch(`/fetch-legend-data/${selectedSetupId}`)
         .then(response => response.json())
         .then(data => updateLegendTable(data))
         .catch(error => console.error('Error:', error));
@@ -511,10 +514,9 @@ function loadLegendTableFromStorage() {
 // save legend data asynchronously
 function updateLegendTable(data) {
     const tableBody = document.getElementById('legend-table-body');
-
     localStorage.setItem('legendData', JSON.stringify(data));
-
     // Clear the existing table content
+    loadSelectedTiles();
     tableBody.innerHTML = '';
 
     // Create new rows
