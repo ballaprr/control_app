@@ -46,10 +46,8 @@ payload_map = {
 def fetch_legend_data(request, setup_id):
     # first output_data has the trigger & asset_id
     # setup_id = request.GET.get("setup_id", 254745)
-    print("check")
     api_1_url = 'https://info-beamer.com/api/v1/setup/' + str(setup_id) + '/'
     output_data = []
-    print(api_1_url)
     try:
         response_1 = requests.get(api_1_url, auth=('', os.getenv("API_KEY")))
         response_1.raise_for_status()
@@ -85,10 +83,20 @@ def fetch_legend_data(request, setup_id):
                 item["thumb"] = asset.get("thumb")
                 break
 
-    print(output_data)
     return output_data
 
 
+def get_setups(request):
+    try:
+        response = requests.get("https://info-beamer.com/api/v1/setup/list", auth=('', os.getenv("API_KEY")))
+        if response.status_code == 200:
+            setups = response.json()
+            ids = [item.get("id") for item in setups['setups']]
+            return ids
+        else:
+            return JsonResponse({"error": "Failed to get setups"}, status=500)
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({"error": "Failed to get setups"}, status=500)
 
 # function is called when page is reloaded
 def control_view(request):
@@ -96,11 +104,13 @@ def control_view(request):
     triggers_to_replace = ['59', '60', '61', '62']
     current_time = now().strftime("%H:%M:%S")  # Ensures military time format
     output_data = fetch_legend_data(request, 254745)
+    ids = get_setups(request)
     return render(request, 'dashboard/index.html', {
         'output_data': output_data,       # Pass the output data to the template
         'current_time': current_time,  # Pass the current time to the template
         'tile_range': range(1, 13),      # Send range from 1 to 14 for tiles
         'triggers_to_replace': triggers_to_replace,
+        'ids': ids,
     })
 
 def fetch_legend_data_api(request, setup_id):
@@ -115,7 +125,6 @@ def device_output(request, title_Index):
             return JsonResponse({"error": f"Device id does not exist"}, status=404)
           
         response = requests.get(f"https://info-beamer.com/api/v1/device/{device_id}/output", auth=('', os.getenv("API_KEY")))
-        print(response)
         if response.status_code == 200:
            return JsonResponse(response.json(), status=200)
         else:
@@ -196,7 +205,6 @@ def trigger_action(request):
                 return JsonResponse({"error": "Missing tile or payload"}, status=400)
         
         payload_int = int(payload)
-        print(payload_int)
         if payload_int < 17:
             device_ids = TILE_DEVICE_MAP.get(tile)
             if device_ids is None:
