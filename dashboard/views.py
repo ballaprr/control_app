@@ -91,7 +91,7 @@ def get_setups(request):
         response = requests.get("https://info-beamer.com/api/v1/setup/list", auth=('', os.getenv("API_KEY")))
         if response.status_code == 200:
             setups = response.json()
-            ids = [item.get("id") for item in setups['setups']]
+            ids = [(item.get("id"), item.get("name")) for item in setups['setups']]
             return ids
         else:
             return JsonResponse({"error": "Failed to get setups"}, status=500)

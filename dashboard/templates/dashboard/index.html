@@ -78,7 +78,7 @@
             <button id="refresh-legend">Update Legend</button>
             <select id="setup-dropdown">
                 {% for id in ids %}
-                    <option value="{{ id }}">{{ id }}</option>
+                    <option value="{{ id.0 }}">{{ id.1 }}</option>
                 {% empty %}
                     <option value="">No IDs available</option>
                 {% endfor %}
