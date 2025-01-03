@@ -248,3 +248,8 @@ def trigger_action(request):
         return JsonResponse({"results": responses}, status=200)
         
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+
+def my_page(request):
+    return render(request, 'page.html')
