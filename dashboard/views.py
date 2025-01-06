@@ -252,4 +252,4 @@ def trigger_action(request):
 
 
 def my_page(request):
-    return render(request, 'page.html')
+    return render(request, 'dashboard/page_1.html')
