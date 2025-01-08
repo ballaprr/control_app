@@ -14,6 +14,7 @@ class Device(models.Model):
     name = models.CharField(max_length=255)
     device_id = models.IntegerField(unique=True)
     arena = models.ForeignKey(Arena, on_delete=models.CASCADE, related_name='devices')
+    tile_label = models.CharField(max_length=3, choices=[(f"A{i}", f"A{i}") for i in range(1, 15)], unique=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
