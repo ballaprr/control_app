@@ -95,13 +95,28 @@ WSGI_APPLICATION = 'control_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+"""
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'courtside',
+        'USER': 'postgres',
+        'PASSWORD': 'new_password',
+        'HOST': '10.225.243.88',   # Or the IP address of your PostgreSQL server
+        'PORT': '5432',        # Default PostgreSQL port
+    }
+}
+
+
+AUTH_USER_MODEL = 'dashboard.Arena'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
