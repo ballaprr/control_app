@@ -57,6 +57,7 @@ def dashboard_view(request):
     # Query devices for the user's arena
     devices = Device.objects.filter(arena=arena)
 
+    label_to_device = {device.tile_label: device.device_id for device in devices}
     # Populate TILE_DEVICE_MAP with tile_label and device_id
     
     tile_mappings = {
@@ -65,28 +66,17 @@ def dashboard_view(request):
         "c": ["A11", "A12", "A13", "A14"],
         "d": ["A1", "A2", "A3", "A4", "A5", "A6", "A7"],
         "e": ["A8", "A9", "A10", "A11", "A12", "A13", "A14"],
+        "0": ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11", "A12", "A13", "A14"],
     }
-    global TILE_DEVICE_MAP
-    TILE_DEVICE_MAP = {key: [None] * len(group) for key, group in tile_mappings.items()}
-    TILE_DEVICE_MAP["0"] = []  # Add a key for all devices
-
-    devices_by_label = {device.tile_label: device.device_id for device in devices}
 
     # Populate TILE_DEVICE_MAP
-    for tile_label, group_keys in tile_mappings.items():
-        TILE_DEVICE_MAP[tile_label] = [
-            device.device_id for device in devices if device.tile_label in group_keys
+    for key, labels in tile_mappings.items():
+        TILE_DEVICE_MAP[key] = [
+            label_to_device.get(label, None)  # Replace label with device_id or None if not found
+            for label in labels
         ]
 
-    all_device_ids = [
-        devices_by_label.get(label, None) for group in tile_mappings.values() for label in group
-    ]
-    # Populate TILE_DEVICE_MAP["0"] with all devices
-    TILE_DEVICE_MAP["0"] = all_device_ids
-
-    # Debug print to confirm the data
-    print("Updated TILE_DEVICE_MAP:", TILE_DEVICE_MAP)
-
+    print(TILE_DEVICE_MAP)
     # Redirect to the control view
     return redirect('control_view')
 
@@ -168,6 +158,7 @@ def fetch_legend_data_api(request, setup_id):
 def device_output(request, title_Index):
     try:
         index = int(title_Index) - 1
+        print(TILE_DEVICE_MAP)
         device_id = TILE_DEVICE_MAP.get("0")[index]
         if not device_id:
             return JsonResponse({"error": f"Device id does not exist"}, status=404)
@@ -187,6 +178,7 @@ def reboot_device(request):
         api_key = os.getenv("API_KEY")
         data = json.loads(request.body)
         index = data.get("tile")
+        TILE_DEVICE_MAP = request.session.get('TILE_DEVICE_MAP', {})
         device_id = TILE_DEVICE_MAP.get("0")[int(index) - 1]
         if not device_id:
             return JsonResponse({"error": f"Device id does not exist"}, status=404)
@@ -201,6 +193,7 @@ def reboot_device(request):
 def blackscreen(request):
     if request.method == "POST":
         api_key = os.getenv("API_KEY")
+        TILE_DEVICE_MAP = request.session.get('TILE_DEVICE_MAP', {})
         device_ids = TILE_DEVICE_MAP.get("0")
 
         def send_request(device_id):
@@ -220,6 +213,7 @@ def get_deviceid(request, tileIndex):
     try:
         api_key = os.getenv("API_KEY")
         tileIndex = int(tileIndex) - 1
+        TILE_DEVICE_MAP = request.session.get('TILE_DEVICE_MAP', {})
         device_id = TILE_DEVICE_MAP.get("0")[tileIndex]
         if not device_id:
             return JsonResponse({"error": f"Device id does not exist"}, status=404)
@@ -248,6 +242,7 @@ def trigger_action(request):
         data = json.loads(request.body)
         tile = data.get("tile")
         payload = data.get("payload")
+        TILE_DEVICE_MAP = request.session.get('TILE_DEVICE_MAP', {})
         # Forward the request to the external API
         if not tile or not payload:
                 return JsonResponse({"error": "Missing tile or payload"}, status=400)
@@ -274,7 +269,7 @@ def trigger_action(request):
             device_ids = TILE_DEVICE_MAP.get(tile)
             if device_ids is None:
                     return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
-            
+            print(device_ids)
             if len(device_ids) != len(payload_map[payload]):
                 return JsonResponse({"error": f"Tile {tile} does not have the correct number of devices"}, status=400)
             
