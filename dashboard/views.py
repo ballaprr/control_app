@@ -1,4 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from arena.models import Arena
+from devices.models import Device
 from django.utils.timezone import now
 from django.http import JsonResponse
 import requests
@@ -10,7 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
+"""
 TILE_DEVICE_MAP = {
     "a": [39353, 39354, None, None],
     "b": [39265, 39262, 39266, 39264], 
@@ -19,7 +22,6 @@ TILE_DEVICE_MAP = {
     "e": [39266, 39264, None, None, None, None, None],
     "0": [39353, 39354, None, None, None, 39265, 39262, 39266, 39264, None, None, None, None, None]
 }
-"""
 
 TILE_DEVICE_MAP = {
     "a": [39353, 39354, 39357, 39358],
@@ -30,6 +32,7 @@ TILE_DEVICE_MAP = {
     "0": [39353, 39354, 39357, 39358, 39268, 39269, 39270, 39271, 39272, 39274, 39277, 39278],
 }
 """
+TILE_DEVICE_MAP = {}
 
 payload_map = {
     "17": ["17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"],
@@ -41,6 +44,52 @@ payload_map = {
     "23": ["71", "72", "73", "74", "75", "76", "77"],
     "24": ["78", "79", "80", "81", "82", "83", "84"],
 }
+
+@login_required
+def dashboard_view(request):
+    # Check if user is logged in
+    if not request.user.is_authenticated:
+        return redirect('arena:login')  # Redirect to login if not authenticated
+
+    # Fetch the user's selected arena
+    arena = request.user  # Assuming the user is an arena (AbstractUser)
+
+    # Query devices for the user's arena
+    devices = Device.objects.filter(arena=arena)
+
+    # Populate TILE_DEVICE_MAP with tile_label and device_id
+    
+    tile_mappings = {
+        "a": ["A1", "A2", "A3", "A4"],
+        "b": ["A6", "A7", "A8", "A9"],
+        "c": ["A11", "A12", "A13", "A14"],
+        "d": ["A1", "A2", "A3", "A4", "A5", "A6", "A7"],
+        "e": ["A8", "A9", "A10", "A11", "A12", "A13", "A14"],
+    }
+
+    global TILE_DEVICE_MAP
+    TILE_DEVICE_MAP = {key: [None] * len(group) for key, group in tile_mappings.items()}
+    TILE_DEVICE_MAP["0"] = []  # Add a key for all devices
+
+    devices_by_label = {device.tile_label: device.device_id for device in devices}
+
+    # Populate TILE_DEVICE_MAP
+    for tile_label, group_keys in tile_mappings.items():
+        TILE_DEVICE_MAP[tile_label] = [
+            device.device_id for device in devices if device.tile_label in group_keys
+        ]
+
+    all_device_ids = [
+        devices_by_label.get(label, None) for group in tile_mappings.values() for label in group
+    ]
+    # Populate TILE_DEVICE_MAP["0"] with all devices
+    TILE_DEVICE_MAP["0"] = all_device_ids
+
+    # Debug print to confirm the data
+    print("Updated TILE_DEVICE_MAP:", TILE_DEVICE_MAP)
+
+    # Redirect to the control view
+    return redirect('dashboard:control')
 
 
 def fetch_legend_data(request, setup_id):
