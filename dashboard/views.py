@@ -66,7 +66,6 @@ def dashboard_view(request):
         "d": ["A1", "A2", "A3", "A4", "A5", "A6", "A7"],
         "e": ["A8", "A9", "A10", "A11", "A12", "A13", "A14"],
     }
-
     global TILE_DEVICE_MAP
     TILE_DEVICE_MAP = {key: [None] * len(group) for key, group in tile_mappings.items()}
     TILE_DEVICE_MAP["0"] = []  # Add a key for all devices

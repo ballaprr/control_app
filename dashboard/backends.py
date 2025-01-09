@@ -1,5 +1,5 @@
 from django.contrib.auth.backends import BaseBackend
-from .models import Arena
+from arena.models import Arena
 
 class ArenaAuthenticationBackend(BaseBackend):
     def authenticate(self, request, arena_name=None):

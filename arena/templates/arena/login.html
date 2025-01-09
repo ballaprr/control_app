@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Login</h1>
-    <form method="post" action="{% url 'login_view' %}">
+    <form method="post">
         {% csrf_token %}
         <label for="arena">Select an Arena:</label>
         <select name="arena" id="arena" required>
