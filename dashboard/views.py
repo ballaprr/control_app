@@ -88,7 +88,7 @@ def dashboard_view(request):
     print("Updated TILE_DEVICE_MAP:", TILE_DEVICE_MAP)
 
     # Redirect to the control view
-    return redirect('dashboard:control')
+    return redirect('control_view')
 
 
 def fetch_legend_data(request, setup_id):

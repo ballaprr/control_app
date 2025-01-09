@@ -11,7 +11,7 @@ def login_view(request):
         if arena_id:
             print(arena_id)
             request.session['arena_id'] = arena_id
-            user = authenticate(request, username='user', password='password')  # Adjust for real logic
+            user = authenticate(request)  # Adjust for real logic
             if user:
                 login(request, user)
                 return redirect('dashboard:dashboard')
