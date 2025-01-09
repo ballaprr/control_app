@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'dashboard',
+    'arena',
+    'devices',
 ]
 
 
@@ -70,6 +72,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'dashboard.backends.ArenaAuthenticationBackend',
+]
+
 
 ROOT_URLCONF = 'control_app.urls'
 
@@ -110,13 +117,13 @@ DATABASES = {
         'NAME': 'courtside',
         'USER': 'postgres',
         'PASSWORD': 'new_password',
-        'HOST': '10.225.243.88',   # Or the IP address of your PostgreSQL server
+        'HOST': 'localhost',   # Or the IP address of your PostgreSQL server
         'PORT': '5432',        # Default PostgreSQL port
     }
 }
 
 
-AUTH_USER_MODEL = 'dashboard.Arena'
+AUTH_USER_MODEL = 'arena.Arena'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
