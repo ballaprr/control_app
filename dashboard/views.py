@@ -15,9 +15,9 @@ TILE_DEVICE_MAP = {
     "a": [39353, 39354, None, None],
     "b": [39265, 39262, 39266, 39264], 
     "c": [None, None, None, None],
-    "d": [None, None, None, None, 39265, 39262],
-    "e": [39266, 39264, None, None, None, None],
-    "0": [39353, 39354, None, None, 39265, 39262, 39266, 39264, None, None, None, None]
+    "d": [None, None, None, None, None, 39265, 39262],
+    "e": [39266, 39264, None, None, None, None, None],
+    "0": [39353, 39354, None, None, None, 39265, 39262, 39266, 39264, None, None, None, None, None]
 }
 """
 
@@ -108,7 +108,7 @@ def control_view(request):
     return render(request, 'dashboard/index.html', {
         'output_data': output_data,       # Pass the output data to the template
         'current_time': current_time,  # Pass the current time to the template
-        'tile_range': range(1, 13),      # Send range from 1 to 14 for tiles
+        'tile_range': range(1, 15),      # Send range from 1 to 14 for tiles
         'triggers_to_replace': triggers_to_replace,
         'ids': ids,
     })
