@@ -16,10 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from dashboard import views
+from arena import views as arena_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.control_view, name='control_view'),
+    path('', arena_views.login_view, name='login_view'),
+    path('dashboard-panel/', views.control_view, name='control_view'),
     path('trigger-action/', views.trigger_action, name='trigger_action'),
     path('device-output/<int:title_Index>/', views.device_output, name='device_output'),
     path('blackscreen/', views.blackscreen, name='blackscreen'),
