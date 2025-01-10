@@ -158,7 +158,6 @@ def fetch_legend_data_api(request, setup_id):
 def device_output(request, title_Index):
     try:
         index = int(title_Index) - 1
-        print(TILE_DEVICE_MAP)
         device_id = TILE_DEVICE_MAP.get("0")[index]
         if not device_id:
             return JsonResponse({"error": f"Device id does not exist"}, status=404)
@@ -178,7 +177,6 @@ def reboot_device(request):
         api_key = os.getenv("API_KEY")
         data = json.loads(request.body)
         index = data.get("tile")
-        TILE_DEVICE_MAP = request.session.get('TILE_DEVICE_MAP', {})
         device_id = TILE_DEVICE_MAP.get("0")[int(index) - 1]
         if not device_id:
             return JsonResponse({"error": f"Device id does not exist"}, status=404)
@@ -193,7 +191,6 @@ def reboot_device(request):
 def blackscreen(request):
     if request.method == "POST":
         api_key = os.getenv("API_KEY")
-        TILE_DEVICE_MAP = request.session.get('TILE_DEVICE_MAP', {})
         device_ids = TILE_DEVICE_MAP.get("0")
 
         def send_request(device_id):
@@ -213,7 +210,6 @@ def get_deviceid(request, tileIndex):
     try:
         api_key = os.getenv("API_KEY")
         tileIndex = int(tileIndex) - 1
-        TILE_DEVICE_MAP = request.session.get('TILE_DEVICE_MAP', {})
         device_id = TILE_DEVICE_MAP.get("0")[tileIndex]
         if not device_id:
             return JsonResponse({"error": f"Device id does not exist"}, status=404)
@@ -242,17 +238,13 @@ def trigger_action(request):
         data = json.loads(request.body)
         tile = data.get("tile")
         payload = data.get("payload")
-        TILE_DEVICE_MAP = request.session.get('TILE_DEVICE_MAP', {})
-        # Forward the request to the external API
         if not tile or not payload:
                 return JsonResponse({"error": "Missing tile or payload"}, status=400)
-        
         payload_int = int(payload)
         if payload_int < 17:
             device_ids = TILE_DEVICE_MAP.get(tile)
             if device_ids is None:
                     return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
-            
             # 
             def send_request(device_id):
                 if device_id is None:
@@ -269,7 +261,6 @@ def trigger_action(request):
             device_ids = TILE_DEVICE_MAP.get(tile)
             if device_ids is None:
                     return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
-            print(device_ids)
             if len(device_ids) != len(payload_map[payload]):
                 return JsonResponse({"error": f"Tile {tile} does not have the correct number of devices"}, status=400)
             
