@@ -1,0 +1,12 @@
+<!-- arena/select_arena.html -->
+<h1>Select an Arena</h1>
+<form method="POST">
+    {% csrf_token %}
+    <label for="arena">Choose an arena:</label>
+    <select name="arena_id" id="arena">
+        {% for arena in arenas %}
+            <option value="{{ arena.id }}">{{ arena.name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Continue</button>
+</form>
