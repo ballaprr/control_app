@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'dashboard',
     'arena',
     'devices',
+    'user'
 ]
 
 
@@ -74,7 +75,7 @@ MIDDLEWARE = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'dashboard.backends.ArenaAuthenticationBackend',
+    'dashboard.backends.UserAuthenticationBackend',
 ]
 
 
@@ -123,7 +124,7 @@ DATABASES = {
 }
 
 
-AUTH_USER_MODEL = 'arena.Arena'
+AUTH_USER_MODEL = 'user.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
