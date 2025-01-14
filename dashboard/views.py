@@ -169,6 +169,33 @@ def device_output(request, title_Index):
             
     except (ValueError, IndexError):
         return JsonResponse({"error": "Invalid index"}, status=400)
+    
+
+@csrf_exempt
+def switch_setup(request):
+    if request.method == "POST":
+        api_key = os.getenv("API_KEY")
+        data = json.loads(request.body)
+        setup_id = data.get("setup_id")
+        device_id = data.get("device_id")
+        if (not setup_id) and (not device_id):
+            return JsonResponse({"error": "Missing setup_id or device_id"}, status=400)
+        
+        data = {
+            'setup_id': setup_id,
+        }
+
+
+        try:
+            response = requests.post(f"https://info-beamer.com/api/v1/device/{setup_id}", json=data, auth=('', api_key))
+            if response.status_code == 200:
+                return JsonResponse({'message': 'API call successful', 'data': response.json()})
+            else:
+                return JsonResponse({'error': 'API call failed', 'details': response.text}, status=response.status_code)
+
+        except requests.exceptions.RequestException as e:
+            return JsonResponse({'error': 'Request failed', 'details': str(e)}, status=500)
+        
 
 @csrf_exempt
 def reboot_device(request):

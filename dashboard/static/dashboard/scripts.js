@@ -464,6 +464,21 @@ function handleKeyPress(event) {
         })
         .then(response => response.json())
     }
+
+    if (event.key === 's') {
+        console.log("switch setup");
+        fetch('/switch-setup/', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                device_id: device,
+                setup_id: 257387,
+            })
+        })
+    }
     // Apply the color changes when Enter is pressed
     if (event.key === 'Enter') {
         if (firstParam && secondParam) {
