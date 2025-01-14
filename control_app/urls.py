@@ -25,6 +25,7 @@ urlpatterns = [
     path('control-view/', views.control_view, name='control_view'),
     path('dashboard/', include('dashboard.urls')), 
     path('user', include('user.urls')),
+    path('arena', include('arena.urls')),
     # path('dashboard-panel/', views.control_view, name='control_view'),
     path('trigger-action/', views.trigger_action, name='trigger-action'),
     path('device-output/<int:title_Index>/', views.device_output, name='device_output'),

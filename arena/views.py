@@ -9,4 +9,5 @@ def select_arena(request):
             return redirect('dashboard:dashboard')  # Redirect to the dashboard
     else:
         arenas = Arena.objects.all()
+        print(arenas)
         return render(request, 'arena/select_arena.html', {'arenas': arenas})

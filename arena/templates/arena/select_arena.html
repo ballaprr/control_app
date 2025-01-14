@@ -1,11 +1,14 @@
 <!-- arena/select_arena.html -->
 <h1>Select an Arena</h1>
+<p>Debug: Arenas context variable = {{ arenas }}</p>
 <form method="POST">
     {% csrf_token %}
     <label for="arena">Choose an arena:</label>
     <select name="arena_id" id="arena">
         {% for arena in arenas %}
-            <option value="{{ arena.id }}">{{ arena.name }}</option>
+            <option value="{{ arena.id }}">{{ arena.arena_name }}</option>
+        {% empty %}
+            <option disabled>No arenas available</option>
         {% endfor %}
     </select>
     <button type="submit">Continue</button>
