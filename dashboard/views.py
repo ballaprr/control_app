@@ -49,11 +49,10 @@ payload_map = {
 def dashboard_view(request):
     # Check if user is logged in
     if not request.user.is_authenticated:
-        return redirect('arena:login')  # Redirect to login if not authenticated
+        return redirect('user:login')  # Redirect to login if not authenticated
 
     # Fetch the user's selected arena
-    arena = request.user  # Assuming the user is an arena (AbstractUser)
-
+    arena = request.session.get('arena_id')  # Assuming the user is an arena (AbstractUser)
     # Query devices for the user's arena
     devices = Device.objects.filter(arena=arena)
 
