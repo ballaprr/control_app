@@ -38,6 +38,12 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'dashboard/static'),  # Point to your dashboard's static directory
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://control.courtsidevideo.com',
+    'http://control.courtsidevideo.com',  # In case you also want to allow HTTP
+]
+
+
 # Application definition
 
 INSTALLED_APPS = [
