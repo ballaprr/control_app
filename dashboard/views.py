@@ -231,59 +231,71 @@ def get_deviceid(request, tileIndex):
     except (ValueError, IndexError):
         return JsonResponse({"error": "Invalid index"}, status=400)
 
-
 @csrf_exempt
 def trigger_action(request):
-    if request.method == "POST":
-        api_key = os.getenv("API_KEY")
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+
+    api_key = os.getenv("API_KEY")
+    if not api_key:
+        return JsonResponse({"error": "API key is missing"}, status=500)
+
+    try:
         data = json.loads(request.body)
-        tile = data.get("tile")
-        payload = data.get("payload")
-        if not tile or not payload:
-                return JsonResponse({"error": "Missing tile or payload"}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON body"}, status=400)
+
+    tile = data.get("tile")
+    payload = data.get("payload")
+    setup_id = 254745
+
+    if not tile or not payload:
+        return JsonResponse({"error": "Missing tile or payload"}, status=400)
+
+    try:
         payload_int = int(payload)
-        if payload_int < 17:
-            device_ids = TILE_DEVICE_MAP.get(tile)
-            if device_ids is None:
-                    return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
-            # 
-            def send_request(device_id):
-                if device_id is None:
-                    return None
-                url = f'https://info-beamer.com/api/v1/device/{device_id}/node/root/remote/trigger/'
-                response = requests.post(url, data={"data": payload}, auth=('', api_key))
-                return {"device_id": device_id, "status": response.status_code}
+    except ValueError:
+        return JsonResponse({"error": "Payload must be an integer"}, status=400)
 
-            # Use ThreadPoolExecutor to send requests concurrently
-            with ThreadPoolExecutor() as executor:
-                responses = list(executor.map(send_request, device_ids))
+    device_ids = TILE_DEVICE_MAP.get(tile)
+    if not device_ids:
+        return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
 
-        else:
-            device_ids = TILE_DEVICE_MAP.get(tile)
-            if device_ids is None:
-                    return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
-            if len(device_ids) != len(payload_map[payload]):
-                return JsonResponse({"error": f"Tile {tile} does not have the correct number of devices"}, status=400)
-            
-            def send_request(device_id, payload):
-                if device_id is None:
-                    return None
-                url = f'https://info-beamer.com/api/v1/device/{device_id}/node/root/remote/trigger/'
-                response = requests.post(url, data={"data": payload}, auth=('', api_key))
-                return {"device_id": device_id, "status": response.status_code}
+    if payload_int >= 17 and len(device_ids) != len(payload_map.get(payload, [])):
+        return JsonResponse({"error": f"Tile {tile} does not have the correct number of devices"}, status=400)
 
-            # Use ThreadPoolExecutor to send requests concurrently
-            with ThreadPoolExecutor() as executor:
-                responses = list(executor.map(send_request, device_ids, payload_map[payload]))
+    def send_request(device_id, payload_value=None):
+        if device_id is None:
+            return None
+        try:
+            # First API call
+            url_1 = f'https://info-beamer.com/api/v1/device/{device_id}'
+            response_1 = requests.post(url_1, data={"setup_id": setup_id}, auth=('', api_key))
 
-        # Filter out None responses
-        responses = [response for response in responses if response is not None]
-        #
+            # Second API call
+            url_2 = f'https://info-beamer.com/api/v1/device/{device_id}/node/root/remote/trigger/'
+            data = {"data": payload_value or payload}
+            response_2 = requests.post(url_2, data=data, auth=('', api_key))
 
-        return JsonResponse({"results": responses}, status=200)
-        
-    return JsonResponse({"error": "Invalid request method"}, status=405)
+            return {
+                "device_id": device_id,
+                "setup_status": response_1.status_code,
+                "trigger_status": response_2.status_code
+            }
+        except requests.RequestException as e:
+            return {"device_id": device_id, "error": str(e)}
 
+    # Choose payload mapping
+    payloads = [payload] * len(device_ids) if payload_int < 17 else payload_map.get(payload, [])
+
+    # Use ThreadPoolExecutor
+    with ThreadPoolExecutor() as executor:
+        responses = list(executor.map(send_request, device_ids, payloads))
+
+    # Filter out None responses
+    responses = [response for response in responses if response is not None]
+
+    return JsonResponse({"results": responses}, status=200)
 
 @csrf_exempt
 def switch_setup(request):
@@ -294,17 +306,14 @@ def switch_setup(request):
         payload = setup_id
 
         device_ids = TILE_DEVICE_MAP.get(tile)
-        print(device_ids)
         if device_ids is None:
                 return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
             
         def send_request(device_id):
             if device_id is None:
                 return None
-            print(device_id)
             url = f'https://info-beamer.com/api/v1/device/{device_id}'
             response = requests.post(url, data={"setup_id": payload}, auth=('', api_key))
-            print(response)
             return {"status": response.status_code}
 
         # Use ThreadPoolExecutor to send requests concurrently
