@@ -473,10 +473,6 @@ function handleKeyPress(event) {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCsrfToken()
             },
-            body: JSON.stringify({
-                device_id: device,
-                setup_id: 257387,
-            })
         })
     }
     // Apply the color changes when Enter is pressed

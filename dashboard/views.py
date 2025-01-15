@@ -170,31 +170,6 @@ def device_output(request, title_Index):
     except (ValueError, IndexError):
         return JsonResponse({"error": "Invalid index"}, status=400)
     
-
-@csrf_exempt
-def switch_setup(request):
-    if request.method == "POST":
-        api_key = os.getenv("API_KEY")
-        data = json.loads(request.body)
-        setup_id = data.get("setup_id")
-        device_id = data.get("device_id")
-        if (not setup_id) and (not device_id):
-            return JsonResponse({"error": "Missing setup_id or device_id"}, status=400)
-        
-        data = {
-            'setup_id': setup_id,
-        }
-
-
-        try:
-            response = requests.post(f"https://info-beamer.com/api/v1/device/{setup_id}", json=data, auth=('', api_key))
-            if response.status_code == 200:
-                return JsonResponse({'message': 'API call successful', 'data': response.json()})
-            else:
-                return JsonResponse({'error': 'API call failed', 'details': response.text}, status=response.status_code)
-
-        except requests.exceptions.RequestException as e:
-            return JsonResponse({'error': 'Request failed', 'details': str(e)}, status=500)
         
 
 @csrf_exempt
@@ -309,6 +284,39 @@ def trigger_action(request):
         
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+
+@csrf_exempt
+def switch_setup(request):
+    if request.method == "POST":
+        api_key = os.getenv("API_KEY")
+        setup_id = 257387
+        tile = '0'
+        payload = setup_id
+
+        device_ids = TILE_DEVICE_MAP.get(tile)
+        print(device_ids)
+        if device_ids is None:
+                return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
+            
+        def send_request(device_id):
+            if device_id is None:
+                return None
+            print(device_id)
+            url = f'https://info-beamer.com/api/v1/device/{device_id}'
+            response = requests.post(url, data={"setup_id": payload}, auth=('', api_key))
+            print(response)
+            return {"status": response.status_code}
+
+        # Use ThreadPoolExecutor to send requests concurrently
+        with ThreadPoolExecutor() as executor:
+            responses = list(executor.map(send_request, device_ids))
+
+        # Filter out None responses
+        responses = [response for response in responses if response is not None]
+
+        return JsonResponse({"results": responses}, status=200)
+        
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
 def my_page(request):
