@@ -36,3 +36,5 @@ def register_view(request):
             return redirect('arena:select_arena')
 
     return render(request, 'user/register.html')
+
+# check
