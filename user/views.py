@@ -13,11 +13,7 @@ def login_view(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         user = User.objects.filter(email=email).first()
-        print(user)
-        print(email)
-        print(password)
         user = authenticate(request, email=email, password=password)
-        print(user)
         if user:
             login(request, user)
             return redirect('arena:select_arena')
@@ -25,3 +21,18 @@ def login_view(request):
             messages.error(request, 'Email or password is incorrect')
 
     return render(request, 'user/login.html')
+
+
+def register_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = User.objects.filter(email=email).first()
+        if user:
+            messages.error(request, 'Email already exists')
+        else:
+            user = User.objects.create_user(email=email, password=password)
+            login(request, user)
+            return redirect('arena:select_arena')
+
+    return render(request, 'user/register.html')
