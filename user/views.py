@@ -27,11 +27,12 @@ def register_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
+        username = request.POST.get('username')
         user = User.objects.filter(email=email).first()
         if user:
             messages.error(request, 'Email already exists')
         else:
-            user = User.objects.create_user(email=email, password=password)
+            user = User.objects.create_user(email=email, password=password, username=username)
             login(request, user)
             return redirect('arena:select_arena')
 
