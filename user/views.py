@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from .models import User
 from arena.models import Arena
+from django.core.mail import send_mail
 
 
 def login_view(request):
@@ -46,7 +47,16 @@ def forgot_password_view(request):
         email = request.POST.get('email')
         user = User.objects.filter(email=email).first()
         if user:
+            print(email)
+            print(user)
             messages.success(request, 'Password reset link sent to your email')
+            send_mail(
+                subject="Forgot Password Email",
+                message="Test to see if email sent",
+                from_email= "brohan2800@gmail.com",
+                recipient_list=["brohan2800@gmail.com"],
+                fail_silently=False,
+            )
         else:
             messages.error(request, 'Email does not exist')
     return render(request, 'user/forgot_password.html')
