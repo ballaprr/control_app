@@ -36,3 +36,26 @@ def register_view(request):
             return redirect('arena:select_arena')
 
     return render(request, 'user/register.html')
+
+def forgot_password_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        user = User.objects.filter(email=email).first()
+        if user:
+            messages.success(request, 'Password reset link sent to your email')
+        else:
+            messages.error(request, 'Email does not exist')
+    return render(request, 'user/forgot_password.html')
+
+def change_password_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = User.objects.filter(email=email).first()
+        if user:
+            user.set_password(password)
+            user.save()
+            messages.success(request, 'Password changed successfully')
+        else:
+            messages.error(request, 'Email does not exist')
+    return render(request, 'user/change_password.html')
