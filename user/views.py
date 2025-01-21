@@ -58,7 +58,7 @@ def change_password_step1_view(request):
         user = User.objects.filter(email=email).first()
         if user:
             request.session['email'] = email
-            return redirect('user:change_password_step2')
+            return redirect('user:change_password_step2_view')
         else:
             messages.error(request, 'Email does not exist')
     return render(request, 'user/change_password_step1.html')
@@ -69,14 +69,15 @@ def change_password_step2_view(request):
         return redirect('user:change_password_step1')
 
     if request.method == 'POST':
-        old_password = request.POST.get('old_password')
+        old_password = request.POST.get('current_password')
         new_password = request.POST.get('new_password')
         user = User.objects.filter(email=email).first()
+        print(user)
         if user and user.check_password(old_password):
             user.set_password(new_password)
             user.save()
             messages.success(request, 'Password changed successfully')
-            return redirect('user:login')
+            return redirect('user:login_view')
         else:
             messages.error(request, 'Old password is incorrect')
 
