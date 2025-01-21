@@ -23,6 +23,8 @@ def login_view(request):
     return render(request, 'user/login.html')
 
 
+# Need to enhance by signing up and send email to admin to approve
+# User gets email back saying they're approved and can continue
 def register_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -49,15 +51,33 @@ def forgot_password_view(request):
             messages.error(request, 'Email does not exist')
     return render(request, 'user/forgot_password.html')
 
-def change_password_view(request):
+
+def change_password_step1_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
-        password = request.POST.get('password')
         user = User.objects.filter(email=email).first()
         if user:
-            user.set_password(password)
-            user.save()
-            messages.success(request, 'Password changed successfully')
+            request.session['email'] = email
+            return redirect('user:change_password_step2')
         else:
             messages.error(request, 'Email does not exist')
-    return render(request, 'user/change_password.html')
+    return render(request, 'user/change_password_step1.html')
+
+def change_password_step2_view(request):
+    email = request.session.get('email')
+    if not email:
+        return redirect('user:change_password_step1')
+
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        user = User.objects.filter(email=email).first()
+        if user and user.check_password(old_password):
+            user.set_password(new_password)
+            user.save()
+            messages.success(request, 'Password changed successfully')
+            return redirect('user:login')
+        else:
+            messages.error(request, 'Old password is incorrect')
+
+    return render(request, 'user/change_password_step2.html')
