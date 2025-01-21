@@ -7,6 +7,7 @@ from django.contrib import messages
 from .models import User
 from arena.models import Arena
 from django.core.mail import send_mail
+from django.conf import settings
 
 
 def login_view(request):
@@ -53,8 +54,8 @@ def forgot_password_view(request):
             send_mail(
                 subject="Forgot Password Email",
                 message="Test to see if email sent",
-                from_email= "brohan2800@gmail.com",
-                recipient_list=["brohan2800@gmail.com"],
+                from_email= settings.EMAIL_HOST_USER,
+                recipient_list=[email],
                 fail_silently=False,
             )
         else:
