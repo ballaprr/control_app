@@ -27,5 +27,11 @@
             {% endfor %}
         </ul>
     {% endif %}
+
+    <div class="auth-links">
+        <a href="{% url 'user:register_view' %}">Register</a>
+        <a href="{% url 'user:password_reset' %}">Forgot Password?</a>
+        <a href="{% url 'user:password_change' %}">Change Password</a>
+    </div>
 </body>
 </html>
