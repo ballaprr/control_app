@@ -33,6 +33,7 @@ def register_view(request):
             messages.error(request, 'Email already exists')
         else:
             user = User.objects.create_user(email=email, password=password, username=username)
+            user = authenticate(request, email=email, password=password)
             login(request, user)
             return redirect('arena:select_arena')
 
