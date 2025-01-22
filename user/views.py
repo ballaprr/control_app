@@ -8,6 +8,11 @@ from .models import User
 from arena.models import Arena
 from django.core.mail import send_mail
 from django.conf import settings
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 
 
 def login_view(request):
@@ -48,19 +53,44 @@ def forgot_password_view(request):
         email = request.POST.get('email')
         user = User.objects.filter(email=email).first()
         if user:
-            print(email)
-            print(user)
-            messages.success(request, 'Password reset link sent to your email')
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            reset_link = request.build_absolute_uri(reverse('user:reset_password_view', kwargs={'uidb64': uid, 'token': token}))
+            message = f"Click the link below to reset your password:\n{reset_link}"
             send_mail(
-                subject="Forgot Password Email",
-                message="Test to see if email sent",
-                from_email= settings.EMAIL_HOST_USER,
+                subject="Password Reset Request",
+                message=message,
+                from_email=settings.EMAIL_HOST_USER,
                 recipient_list=[email],
                 fail_silently=False,
             )
+            messages.success(request, 'Password reset link sent to your email')
         else:
             messages.error(request, 'Email does not exist')
     return render(request, 'user/forgot_password.html')
+
+def reset_password_view(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            if new_password == confirm_password:
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, 'Password reset successfully')
+                return redirect('user:login_view')
+            else:
+                messages.error(request, 'Passwords do not match')
+        return render(request, 'user/reset_password.html', {'uidb64': uidb64, 'token': token})
+    else:
+        messages.error(request, 'The reset link is invalid')
+        return redirect('user:forgot_password_view')
 
 
 def change_password_step1_view(request):
