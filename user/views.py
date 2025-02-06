@@ -1,8 +1,5 @@
-from django.shortcuts import render
-
-# Create your views here.
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import User
 from arena.models import Arena
@@ -14,24 +11,26 @@ from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 
-
 def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-        user = User.objects.filter(email=email).first()
         user = authenticate(request, email=email, password=password)
         if user:
             login(request, user)
+            request.session['user_id'] = user.id  # Set session token
             return redirect('arena:select_arena')
         else:
             messages.error(request, 'Email or password is incorrect')
 
     return render(request, 'user/login.html')
 
+def logout_view(request):
+    logout(request)
+    request.session.flush()  # Clear session data
+    messages.success(request, 'You have been logged out successfully')
+    return redirect('user:login_view')
 
-# Need to enhance by signing up and send email to admin to approve
-# User gets email back saying they're approved and can continue
 def register_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -44,6 +43,7 @@ def register_view(request):
             user = User.objects.create_user(email=email, password=password, username=username)
             user = authenticate(request, email=email, password=password)
             login(request, user)
+            request.session['user_id'] = user.id  # Set session token
             return redirect('arena:select_arena')
 
     return render(request, 'user/register.html')
@@ -92,7 +92,6 @@ def reset_password_view(request, uidb64, token):
         messages.error(request, 'The reset link is invalid')
         return redirect('user:forgot_password_view')
 
-
 def change_password_step1_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -113,7 +112,6 @@ def change_password_step2_view(request):
         old_password = request.POST.get('current_password')
         new_password = request.POST.get('new_password')
         user = User.objects.filter(email=email).first()
-        print(user)
         if user and user.check_password(old_password):
             user.set_password(new_password)
             user.save()

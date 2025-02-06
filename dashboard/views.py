@@ -247,7 +247,7 @@ def trigger_action(request):
 
     tile = data.get("tile")
     payload = data.get("payload")
-    setup_id = 254745
+    setup_id = 257842
 
     if not tile or not payload:
         return JsonResponse({"error": "Missing tile or payload"}, status=400)
