@@ -2,3 +2,4 @@ dashboard/.env
 db.sqlite3
 env/
 control_app/.env
+.env

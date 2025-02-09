@@ -63,6 +63,17 @@ INSTALLED_APPS = [
     'user'
 ]
 
+# Default: Stores session data in the database
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
+# Alternative: Stores session data in cache
+# SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+
+SESSION_COOKIE_AGE = 1209600  # 2 weeks (default)
+SESSION_SAVE_EVERY_REQUEST = True  # Saves session on every request
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep session even after browser closes
+
+
 
 INSTALLED_APPS += ['channels']
 

@@ -19,6 +19,7 @@ def login_view(request):
         if user:
             login(request, user)
             request.session['user_id'] = user.id  # Set session token
+            request.session['email'] = user.email
             return redirect('arena:select_arena')
         else:
             messages.error(request, 'Email or password is incorrect')
