@@ -48,27 +48,6 @@ def register_view(request):
 
     return render(request, 'user/register.html')
 
-def forgot_password_view(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        user = User.objects.filter(email=email).first()
-        if user:
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            token = default_token_generator.make_token(user)
-            reset_link = request.build_absolute_uri(reverse('user:reset_password_view', kwargs={'uidb64': uid, 'token': token}))
-            message = f"Click the link below to reset your password:\n{reset_link}"
-            send_mail(
-                subject="Password Reset Request",
-                message=message,
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-            messages.success(request, 'Password reset link sent to your email')
-        else:
-            messages.error(request, 'Email does not exist')
-    return render(request, 'user/forgot_password.html')
-
 def reset_password_view(request, uidb64, token):
     try:
         uid = urlsafe_base64_decode(uidb64).decode()
@@ -91,6 +70,27 @@ def reset_password_view(request, uidb64, token):
     else:
         messages.error(request, 'The reset link is invalid')
         return redirect('user:forgot_password_view')
+
+def forgot_password_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        user = User.objects.filter(email=email).first()
+        if user:
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            reset_link = request.build_absolute_uri(reverse('user:reset_password_view', kwargs={'uidb64': uid, 'token': token}))
+            message = f"Click the link below to reset your password:\n{reset_link}"
+            send_mail(
+                subject="Password Reset Request",
+                message=message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            messages.success(request, 'Password reset link sent to your email')
+        else:
+            messages.error(request, 'Email does not exist')
+    return render(request, 'user/forgot_password.html')
 
 def change_password_step1_view(request):
     if request.method == 'POST':
