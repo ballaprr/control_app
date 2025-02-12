@@ -27,6 +27,7 @@ def login_view(request):
     return render(request, 'user/login.html')
 
 def logout_view(request):
+    print("Check if logout is called")
     logout(request)
     request.session.flush()  # Clear session data
     messages.success(request, 'You have been logged out successfully')

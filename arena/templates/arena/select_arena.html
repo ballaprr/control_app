@@ -8,6 +8,10 @@
     <div style="position: absolute; top: 10px; right: 10px;">
         {% if request.user.is_authenticated %}
             Logged in as: {{ request.user.email }}
+            <form method="POST" action="{% url 'user:logout_view' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
         {% else %}
             Not logged in
         {% endif %}
