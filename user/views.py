@@ -12,6 +12,9 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('arena:select_arena')  # Redirect logged-in users
+
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -27,10 +30,10 @@ def login_view(request):
     return render(request, 'user/login.html')
 
 def home_redirect_view(request):
-    print(request.user.is_authenticated)
     if request.user.is_authenticated:
-        return redirect('arena:select_arena')
-    return redirect('user:login_view')
+        arenas = Arena.objects.all()
+        return render(request, 'arena/select_arena.html', {'arenas': arenas})
+    return render(request, 'user/login.html')
 
 def logout_view(request):
     print("Check if logout is called")
