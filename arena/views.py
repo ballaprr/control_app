@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from .models import Arena
 
+@login_required
 def select_arena(request):
     if request.method == 'POST':
         arena_id = request.POST.get('arena_id')

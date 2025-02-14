@@ -38,6 +38,9 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = '/var/www/html/static/'
 
+LOGIN_URL = '/'
+LOGIN_REDIRECT_URL = '/arena/'
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'dashboard/static'),  # Point to your dashboard's static directory
 ]

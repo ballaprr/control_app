@@ -136,6 +136,7 @@ def get_setups(request):
         return JsonResponse({"error": "Failed to get setups"}, status=500)
 
 # function is called when page is reloaded
+@login_required
 def control_view(request):
     # Get current time in military format (HH:MM:SS)
     triggers_to_replace = ['59', '60', '61', '62']
