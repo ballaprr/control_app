@@ -21,7 +21,8 @@ from user import views as user_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', user_views.login_view, name='login_view'),
+    # path('', user_views.login_view, name='login_view'),
+    path('', user_views.home_redirect_view, name='home_redirect_view'),
     path('control-view/', views.control_view, name='control_view'),
     path('dashboard/', include('dashboard.urls')), 
     path('user', include('user.urls')),

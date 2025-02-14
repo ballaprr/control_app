@@ -26,6 +26,12 @@ def login_view(request):
 
     return render(request, 'user/login.html')
 
+def home_redirect_view(request):
+    print(request.user.is_authenticated)
+    if request.user.is_authenticated:
+        return redirect('arena:select_arena')
+    return redirect('user:login_view')
+
 def logout_view(request):
     print("Check if logout is called")
     logout(request)
