@@ -18,7 +18,7 @@
     </div>
 
     <h1>Select an Arena</h1>
-    <form method="POST">
+    <form method="POST" action="{% url 'arena:select_arena' %}">
         {% csrf_token %}
         <label for="arena">Choose an arena:</label>
         <select name="arena_id" id="arena">
