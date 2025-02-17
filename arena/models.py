@@ -1,4 +1,5 @@
 from django.db import models
+from user.models import User
 
 # Create your models here.
 class Arena(models.Model):
@@ -6,6 +7,7 @@ class Arena(models.Model):
     #email = None
     arena_name = models.CharField(max_length=100, unique=True)
     brightness = models.IntegerField(default=75)
+    active_controller = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='active_controller')
 
 """
     is_superuser = models.BooleanField(default=False)
