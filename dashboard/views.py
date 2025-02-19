@@ -226,7 +226,7 @@ def takecontrol(request):
                 print("Arena is not controlled by any user")
                 arena.active_controller = user
                 arena.save()
-            elif (arena.active_controller == user.id):
+            elif (arena.active_controller == user):
                 arena.active_controller = None
                 arena.save()
             else:
