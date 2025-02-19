@@ -10,6 +10,10 @@ import os
 from django.views.decorators.csrf import csrf_exempt
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
 load_dotenv()
 
@@ -207,35 +211,27 @@ def blackscreen(request):
 
         return JsonResponse({"results": responses}, status=200)
     
-@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def takecontrol(request):
-    if request.method == "POST":
-        user = request.user
-        if not user.is_authenticated:
-            return JsonResponse({"error": "User not authenticated"}, status=403)
-        
-        arena_id = request.session.get('arena_id')
-        if not arena_id:
-            return JsonResponse({"error": "Arena ID not found in session"}, status=400)
-        print(user)
-        print(arena_id)
-        
-        try:
-            arena = Arena.objects.get(id=arena_id)
-            if arena.active_controller is None:
-                print("Arena is not controlled by any user")
-                arena.active_controller = user
-                arena.save()
-            elif (arena.active_controller == user):
-                arena.active_controller = None
-                arena.save()
-            else:
-                return JsonResponse({"error": "Arena is already controlled by another user"}, status=403)
-            return JsonResponse({"status": "Active controller updated successfully"}, status=200)
-        except Arena.DoesNotExist:
-            return JsonResponse({"error": "Arena not found"}, status=404)
-    else:
-        return JsonResponse({"error": "Invalid request method"}, status=405)
+    user = request.user
+    arena_id = request.session.get('arena_id')
+    if not arena_id:
+        return Response({"error": "Arena ID not found in session"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        arena = Arena.objects.get(id=arena_id)
+        if arena.active_controller is None:
+            arena.active_controller = user
+            arena.save()
+        elif arena.active_controller == user:
+            arena.active_controller = None
+            arena.save()
+        else:
+            return Response({"error": "Arena is already controlled by another user"}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"status": "Active controller updated successfully"}, status=status.HTTP_200_OK)
+    except Arena.DoesNotExist:
+        return Response({"error": "Arena not found"}, status=status.HTTP_404_NOT_FOUND)
     
 
           
