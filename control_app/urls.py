@@ -36,4 +36,5 @@ urlpatterns = [
     path('fetch-legend-data/<int:setup_id>/', views.fetch_legend_data_api, name='fetch_legend_data'),
     path('page_1/', views.my_page, name='page_1'),
     path('switch-setup/', views.switch_setup, name='switch_setup'),
+    path('takecontrol/', views.takecontrol, name='takecontrol'),
 ]

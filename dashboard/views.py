@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from arena.models import Arena
+from arena.models import Arena, User
 from devices.models import Device
 from django.utils.timezone import now
 from django.http import JsonResponse
@@ -206,6 +206,38 @@ def blackscreen(request):
         responses = [response for response in responses if response is not None]
 
         return JsonResponse({"results": responses}, status=200)
+    
+@csrf_exempt
+def takecontrol(request):
+    if request.method == "POST":
+        user = request.user
+        if not user.is_authenticated:
+            return JsonResponse({"error": "User not authenticated"}, status=403)
+        
+        arena_id = request.session.get('arena_id')
+        if not arena_id:
+            return JsonResponse({"error": "Arena ID not found in session"}, status=400)
+        print(user)
+        print(arena_id)
+        
+        try:
+            arena = Arena.objects.get(id=arena_id)
+            if arena.active_controller is None:
+                print("Arena is not controlled by any user")
+                arena.active_controller = user
+                arena.save()
+            elif (arena.active_controller == user.id):
+                arena.active_controller = None
+                arena.save()
+            else:
+                return JsonResponse({"error": "Arena is already controlled by another user"}, status=403)
+            return JsonResponse({"status": "Active controller updated successfully"}, status=200)
+        except Arena.DoesNotExist:
+            return JsonResponse({"error": "Arena not found"}, status=404)
+    else:
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+    
+
           
 @csrf_exempt
 def get_deviceid(request, tileIndex):
