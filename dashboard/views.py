@@ -162,6 +162,9 @@ def fetch_legend_data_api(request, setup_id):
     return JsonResponse(output_data, safe=False)
 
 def device_output(request, title_Index):
+    if Arena.objects.get(id=request.session.get('arena_id')).active_controller != request.user:
+        return JsonResponse({"error": "You are not the active controller"}, status=403)
+    
     try:
         index = int(title_Index) - 1
         device_id = TILE_DEVICE_MAP.get("0")[index]
@@ -181,6 +184,9 @@ def device_output(request, title_Index):
 
 @csrf_exempt
 def reboot_device(request):
+    if Arena.objects.get(id=request.session.get('arena_id')).active_controller != request.user:
+        return JsonResponse({"error": "You are not the active controller"}, status=403)
+    
     if request.method == "POST":
         api_key = os.getenv("API_KEY")
         data = json.loads(request.body)
@@ -197,6 +203,9 @@ def reboot_device(request):
 
 @csrf_exempt
 def blackscreen(request):
+    if Arena.objects.get(id=request.session.get('arena_id')).active_controller != request.user:
+        return JsonResponse({"error": "You are not the active controller"}, status=403)
+    
     if request.method == "POST":
         api_key = os.getenv("API_KEY")
         device_ids = TILE_DEVICE_MAP.get("0")
@@ -239,6 +248,9 @@ def takecontrol(request):
           
 @csrf_exempt
 def get_deviceid(request, tileIndex):
+    if Arena.objects.get(id=request.session.get('arena_id')).active_controller != request.user:
+        return JsonResponse({"error": "You are not the active controller"}, status=403)
+    
     try:
         api_key = os.getenv("API_KEY")
         tileIndex = int(tileIndex) - 1
@@ -264,6 +276,10 @@ def get_deviceid(request, tileIndex):
 
 @csrf_exempt
 def trigger_action(request):
+
+    if Arena.objects.get(id=request.session.get('arena_id')).active_controller != request.user:
+        return JsonResponse({"error": "You are not the active controller"}, status=403)
+    
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request method"}, status=405)
 
