@@ -211,8 +211,8 @@ def blackscreen(request):
 
         return JsonResponse({"results": responses}, status=200)
     
+@csrf_exempt
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def takecontrol(request):
     user = request.user
     arena_id = request.session.get('arena_id')

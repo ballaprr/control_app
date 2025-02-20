@@ -309,6 +309,20 @@ function formatDataAndDisplay(data) {
     container.appendChild(table);
 }
 
+function takeControl() {
+    fetch("/api/takecontrol/", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken()
+    },
+      body: JSON.stringify({})  // Include data if needed; otherwise, pass an empty object
+    })
+    .then(response => response.json())
+    .then(data => alert(data.status))  // Show response message
+    .catch(error => console.error("Error:", error));
+  }
+
 function handleKeyPress(event) {
     if (event.key.length === 1 || event.key === 'Enter') { // Add single characters and Enter key
         keyBuffer += event.key;

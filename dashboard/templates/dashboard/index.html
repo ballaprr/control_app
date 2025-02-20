@@ -15,10 +15,7 @@
                 {% csrf_token %}
                 <button type="submit">Logout</button>
             </form>
-            <form method="POST" action="{% url 'dashboard:takecontrol' %}" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit">Take Control</button>
-            </form>
+            <button type="button" onclick="takeControl()">Take Control</button>
         {% else %}
             Not logged in
         {% endif %}
