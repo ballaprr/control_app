@@ -15,6 +15,9 @@
                 {% csrf_token %}
                 <button type="submit">Logout</button>
             </form>
+            <div>
+                Active Controller: {{ active_controller }}
+            </div>
             <button type="button" onclick="takeControl()">Take Control</button>
         {% else %}
             Not logged in

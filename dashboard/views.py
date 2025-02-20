@@ -147,12 +147,14 @@ def control_view(request):
     current_time = now().strftime("%H:%M:%S")  # Ensures military time format
     output_data = fetch_legend_data(request, 254745)
     ids = get_setups(request)
+    active_controller = Arena.objects.get(id=request.session.get('arena_id')).active_controller
     return render(request, 'dashboard/index.html', {
         'output_data': output_data,       # Pass the output data to the template
         'current_time': current_time,  # Pass the current time to the template
         'tile_range': range(1, 15),      # Send range from 1 to 14 for tiles
         'triggers_to_replace': triggers_to_replace,
         'ids': ids,
+        'active_controller': active_controller,
     })
 
 def fetch_legend_data_api(request, setup_id):
