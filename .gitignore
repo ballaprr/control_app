@@ -3,3 +3,6 @@ db.sqlite3
 env/
 control_app/.env
 .env
+control_app/node_modules
+.pyc
+__pycache__
