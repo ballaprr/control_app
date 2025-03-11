@@ -20,13 +20,15 @@ def login_view(request):
         password = request.POST.get('password')
         user = authenticate(request, email=email, password=password)
         if user:
-            if user.email_verified:
+            if user.email_verified and user.admin_verified:
                 login(request, user)
                 request.session['user_id'] = user.id  # Set session token
                 request.session['email'] = user.email
                 return redirect('arena:select_arena')
-            else:
+            elif not user.email_verified:
                 messages.error(request, 'Please verify your email before logging in')
+            elif not user.admin_verified:
+                messages.error(request, 'Your account is pending administrator approval')
         else:
             messages.error(request, 'Email or password is incorrect')
 
@@ -86,13 +88,72 @@ def verify_email(request, uidb64, token):
         user = None
 
     if user is not None and default_token_generator.check_token(user, token):
-        user.email_verified = True
-        user.save()
-        messages.success(request, 'Your email has been verified successfully. You can now login.')
+        # Generate host verification token
+        host_token = default_token_generator.make_token(user)
+        host_verification_link = request.build_absolute_uri(
+            reverse('user:host_verify', kwargs={'uidb64': uidb64, 'token': host_token})
+        )
+        
+        # Send email to host for final verification
+        host_message = f"""A new user has requested verification:
+        
+Email: {user.email}
+Username: {user.username}
+
+Please click the link below to approve or deny this verification:
+{host_verification_link}"""
+
+        send_mail(
+            subject="User Verification Request",
+            message=host_message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[settings.EMAIL_HOST_USER],  # Send to host email
+            fail_silently=False,
+        )
+        messages.success(request, 'Your email verification request has been sent to the administrator for approval.')
     else:
         messages.error(request, 'The verification link is invalid or has expired.')
     
     return redirect('user:login_view')
+
+def host_verify(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            verification_choice = request.POST.get('verification_choice')
+            if verification_choice == 'approve':
+                user.email_verified = True
+                user.admin_verified = True
+                user.save()
+                # Send approval email to user
+                send_mail(
+                    subject="Account Verified",
+                    message="Your account has been verified. You can now login to your account.",
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+                messages.success(request, 'User has been verified successfully.')
+            else:
+                # Send rejection email to user
+                send_mail(
+                    subject="Account Verification Denied",
+                    message="Your account verification request has been denied. Please contact support for more information.",
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+                messages.error(request, 'User verification has been denied.')
+            return redirect('user:login_view')
+        return render(request, 'user/host_verify.html', {'uidb64': uidb64, 'token': token, 'user_email': user.email})
+    else:
+        messages.error(request, 'The verification link is invalid or has expired.')
+        return redirect('user:login_view')
 
 def reset_password_view(request, uidb64, token):
     try:

@@ -15,6 +15,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=100, blank=False)
     is_admin = models.BooleanField(default=False, blank=False)
     email_verified = models.BooleanField(default=False, blank=False)
+    admin_verified = models.BooleanField(default=False, blank=False)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'password']
