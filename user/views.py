@@ -20,10 +20,13 @@ def login_view(request):
         password = request.POST.get('password')
         user = authenticate(request, email=email, password=password)
         if user:
-            login(request, user)
-            request.session['user_id'] = user.id  # Set session token
-            request.session['email'] = user.email
-            return redirect('arena:select_arena')
+            if user.email_verified:
+                login(request, user)
+                request.session['user_id'] = user.id  # Set session token
+                request.session['email'] = user.email
+                return redirect('arena:select_arena')
+            else:
+                messages.error(request, 'Please verify your email before logging in')
         else:
             messages.error(request, 'Email or password is incorrect')
 
@@ -52,10 +55,10 @@ def register_view(request):
             messages.error(request, 'Email already exists')
         else:
             user = User.objects.create_user(email=email, password=password, username=username)
-            user = authenticate(request, email=email, password=password)
-            login(request, user)
-            request.session['user_id'] = user.id  # Set session token
-            return redirect('arena:select_arena')
+            user.email_verified = False
+            user.save()
+            messages.success(request, 'Registration successful! Please login.')
+            return redirect('user:login_view')
 
     return render(request, 'user/register.html')
 
