@@ -57,10 +57,42 @@ def register_view(request):
             user = User.objects.create_user(email=email, password=password, username=username)
             user.email_verified = False
             user.save()
-            messages.success(request, 'Registration successful! Please login.')
+            
+            # Generate verification token
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            verification_link = request.build_absolute_uri(
+                reverse('user:verify_email', kwargs={'uidb64': uid, 'token': token})
+            )
+            message = f"Welcome to our platform! Please click the link below to verify your email:\n{verification_link}"
+            
+            send_mail(
+                subject="Verify Your Email",
+                message=message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            messages.success(request, 'Registration successful! Please check your email to verify your account.')
             return redirect('user:login_view')
 
     return render(request, 'user/register.html')
+
+def verify_email(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.email_verified = True
+        user.save()
+        messages.success(request, 'Your email has been verified successfully. You can now login.')
+    else:
+        messages.error(request, 'The verification link is invalid or has expired.')
+    
+    return redirect('user:login_view')
 
 def reset_password_view(request, uidb64, token):
     try:
