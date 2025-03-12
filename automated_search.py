@@ -245,5 +245,28 @@ if second_half_index is not None:
                 }
                 game_data["2ND_HALF"][current_time].append(graphic_object)
 
+# Process POST GAME section
+post_game_index = None
+for idx, row in df.iterrows():
+    if any(str(cell).strip().upper() == 'POST GAME' for cell in row):
+        post_game_index = idx
+        break
+
+if post_game_index is not None:
+    # Find the column indices for the POST GAME section
+    courtside_column = 10  # COURTSIDE is in column 10
+    
+    # Process the data rows
+    start_idx = post_game_index + 1
+    for idx in range(start_idx, len(df)):
+        row = df.iloc[idx]
+        
+        # Process courtside value
+        if pd.notna(row.iloc[courtside_column]):
+            courtside_value = str(row.iloc[courtside_column]).strip()
+            if courtside_value != 'nan':
+                game_data["POST_GAME"] = courtside_value
+                break  # Take the first non-nan courtside value
+
 # Print structured output
 print(json.dumps(game_data, indent=4))
