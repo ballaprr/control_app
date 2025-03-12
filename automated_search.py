@@ -7,6 +7,10 @@ df = pd.read_csv('courtside.csv')
 # Search terms
 search_terms = ['PRE-GAME', '1ST HALF', 'HALFTIME', '2ND HALF', 'POST GAME']
 
+# Initialize data dictionary
+game_data = {}
+
+# Process PRE-GAME section
 pre_game_index = None
 for idx, row in df.iterrows():
     if any(str(cell).strip().upper() == 'PRE-GAME' for cell in row):
@@ -28,8 +32,8 @@ if pre_game_index is not None:
         if str(cell).strip() == '#':
             sequence_column = col_idx
 
-    # Dictionary to store output in required format
-    pre_game_data = {"PRE_GAME": {}}
+    # Dictionary to store PRE-GAME output
+    game_data["PRE_GAME"] = {}
 
     # Collect all values under the "CLOCK", "#", and "COURTSIDE" columns until the next segment (1ST HALF) starts
     for idx in range(pre_game_index + 2, len(df)):
@@ -56,12 +60,122 @@ if pre_game_index is not None:
             }
 
             # Add to dictionary
-            if clock_value not in pre_game_data["PRE_GAME"]:
-                pre_game_data["PRE_GAME"][clock_value] = []
-            pre_game_data["PRE_GAME"][clock_value].append(graphic_object)
+            if clock_value not in game_data["PRE_GAME"]:
+                game_data["PRE_GAME"][clock_value] = []
+            game_data["PRE_GAME"][clock_value].append(graphic_object)
 
-    # Print structured output
-    print(json.dumps(pre_game_data, indent=4))
+# Process 1ST HALF section
+first_half_index = None
+for idx, row in df.iterrows():
+    if any(str(cell).strip().upper() == '1ST HALF' for cell in row):
+        first_half_index = idx
+        break
 
-else:
-    print("PRE-GAME section not found.")
+if first_half_index is not None:
+    
+    # Find the column indices for the 1ST HALF section
+    first_half_header = df.iloc[first_half_index]
+    clock_column = 1  # Clock is in column 1 for 1ST HALF
+    courtside_column = 10  # COURTSIDE is in column 10
+    sequence_column = 3  # # is in column 3
+    
+    # Dictionary to store 1ST HALF output
+    game_data["1ST_HALF"] = {
+        "16:00": [],
+        "12:00": [],
+        "8:00": [],
+        "4:00": []
+    }
+
+    # Process the data rows
+    current_time = None
+    start_idx = first_half_index + 1
+    for idx in range(start_idx, len(df)):
+        row = df.iloc[idx]
+        
+        # Check if we've reached the next section
+        if any(str(cell).strip().upper() in ['HALFTIME', '2ND HALF', 'POST GAME'] for cell in row):
+            break
+
+        # Process clock value
+        if pd.notna(row.iloc[clock_column]):
+            clock_text = str(row.iloc[clock_column]).strip()
+            
+            # Extract time from format "1:1 (Under 16:00)"
+            if clock_text:  # Process any non-empty clock text
+                time_str = None
+                if ':' in clock_text:  # Check if it contains a play number (e.g., "1:1")
+                    parts = clock_text.split('(')
+                    if len(parts) > 1:
+                        time_part = parts[1].strip(')')
+                        if 'Under' in time_part:
+                            time_str = time_part.replace('Under', '').strip()
+                
+                if time_str and time_str in game_data["1ST_HALF"]:
+                    current_time = time_str
+                else:
+                    print(f"Debug: Time string not valid or not found in expected times: '{time_str}'")
+
+        # Process courtside value and sequence number
+        if current_time and pd.notna(row.iloc[courtside_column]):
+            courtside_value = str(row.iloc[courtside_column]).strip()
+            sequence_value = row.iloc[sequence_column] if pd.notna(row.iloc[sequence_column]) else None
+
+            # Convert sequence_value to int if possible
+            try:
+                sequence_number = int(float(sequence_value)) if sequence_value is not None else None
+            except (ValueError, TypeError):
+                sequence_number = None
+
+            if courtside_value != 'nan':
+                graphic_object = {
+                    "number": sequence_number,
+                    "graphic": courtside_value
+                }
+                game_data["1ST_HALF"][current_time].append(graphic_object)
+
+# Process HALFTIME section
+halftime_index = None
+for idx, row in df.iterrows():
+    if any(str(cell).strip().upper() == 'HALFTIME' for cell in row):
+        halftime_index = idx
+        break
+
+if halftime_index is not None:
+    # Find the column indices for the HALFTIME section
+    clock_column = 1  # Clock is in column 1
+    courtside_column = 10  # COURTSIDE is in column 10
+    sequence_column = 3  # # is in column 3
+    
+    # Dictionary to store HALFTIME output
+    game_data["HALFTIME"] = {}
+
+    # Process the data rows
+    start_idx = halftime_index + 1
+    for idx in range(start_idx, len(df)):
+        row = df.iloc[idx]
+        
+        # Check if we've reached the next section
+        if any(str(cell).strip().upper() in ['2ND HALF', 'POST GAME'] for cell in row):
+            break
+
+        # Process clock value and courtside value
+        if pd.notna(row.iloc[clock_column]) and pd.notna(row.iloc[courtside_column]):
+            clock_text = str(row.iloc[clock_column]).strip()
+            courtside_value = str(row.iloc[courtside_column]).strip()
+            
+            # Extract time from clock text
+            if ':' in clock_text:
+                # If the time is in parentheses, extract it
+                if '(' in clock_text:
+                    time_str = clock_text.split('(')[1].strip(')')
+                else:
+                    time_str = clock_text
+                
+                # Clean up the time string
+                time_str = time_str.strip()
+                if courtside_value != 'nan':
+                    game_data["HALFTIME"][time_str] = courtside_value
+
+# Print structured output
+print(json.dumps(game_data, indent=4))
