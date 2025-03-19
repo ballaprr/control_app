@@ -162,8 +162,6 @@ def fetch_legend_data_api(request, setup_id):
     return JsonResponse(output_data, safe=False)
 
 def device_output(request, title_Index):
-    if Arena.objects.get(id=request.session.get('arena_id')).active_controller != request.user:
-        return JsonResponse({"error": "You are not the active controller"}, status=403)
     
     try:
         index = int(title_Index) - 1
