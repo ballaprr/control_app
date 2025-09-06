@@ -130,7 +130,7 @@ dist
 
 # Gatsby files
 .cache/
-public
+# public  # Commented out - conflicts with React frontend/public/
 
 # Storybook build outputs
 .out
