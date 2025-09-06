@@ -1,0 +1,55 @@
+"""control_app URL Configuration
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/4.1/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+from django.contrib import admin
+from django.urls import path, include
+from dashboard import views
+from arena import views as arena_views
+from user import views as user_views
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    
+    # API endpoints
+    path('api/auth/', include('user.api_urls')),
+    path('api/arenas/', include('arena.api_urls')),
+    path('api/devices/', include('devices.api_urls')),
+    
+    # Dashboard API endpoints
+    path('api/trigger-action/', views.trigger_action, name='api_trigger_action'),
+    path('api/device-output/<int:title_Index>/', views.device_output, name='api_device_output'),
+    path('api/blackscreen/', views.blackscreen, name='api_blackscreen'),
+    path('api/get-deviceid/<int:tileIndex>/', views.get_deviceid, name='api_get_deviceid'),
+    path('api/reboot-device/', views.reboot_device, name='api_reboot_device'),
+    path('api/fetch-legend-data/<int:setup_id>/', views.fetch_legend_data_api, name='api_fetch_legend_data'),
+    path('api/switch-setup/', views.switch_setup, name='api_switch_setup'),
+    path('api/takecontrol/', views.takecontrol, name='api_takecontrol'),
+    
+    # Legacy web views (can be removed once React frontend is ready)
+    path('', user_views.home_redirect_view, name='home_redirect_view'),
+    path('control-view/', views.control_view, name='control_view'),
+    path('dashboard/', include('dashboard.urls')), 
+    path('user', include('user.urls')),
+    path('arena', include('arena.urls')),
+    path('trigger-action/', views.trigger_action, name='trigger-action'),
+    path('device-output/<int:title_Index>/', views.device_output, name='device_output'),
+    path('blackscreen/', views.blackscreen, name='blackscreen'),
+    path('get-deviceid/<int:tileIndex>/', views.get_deviceid, name='get_deviceid'),
+    path('reboot-device/', views.reboot_device, name='reboot_device'),
+    path('fetch-legend-data/<int:setup_id>/', views.fetch_legend_data_api, name='fetch_legend_data'),
+    path('page_1/', views.my_page, name='page_1'),
+    path('switch-setup/', views.switch_setup, name='switch_setup'),
+    path('api/takecontrol/', views.takecontrol, name='takecontrol'),
+]

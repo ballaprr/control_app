@@ -1,0 +1,16 @@
+from django.db import models
+from arena.models import Arena
+
+# Create your models here.
+
+class Device(models.Model):
+    name = models.CharField(max_length=255)
+    device_id = models.IntegerField(unique=True)
+    arena = models.ForeignKey(Arena, on_delete=models.CASCADE, related_name='devices')
+    tile_label = models.CharField(max_length=3, choices=[(f"A{i}", f"A{i}") for i in range(1, 15)], null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('arena', 'tile_label')
+    def __str__(self):
+        return f"{self.name} (ID:- {self.device_id})"

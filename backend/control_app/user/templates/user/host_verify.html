@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Verify User Account</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-center">Please verify the following user account:</p>
+                    <p class="text-center"><strong>{{ user_email }}</strong></p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center gap-3 mt-4">
+                            <button type="submit" name="verification_choice" value="approve" class="btn btn-success">
+                                Approve
+                            </button>
+                            <button type="submit" name="verification_choice" value="deny" class="btn btn-danger">
+                                Deny
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

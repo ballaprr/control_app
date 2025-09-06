@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control App</title>
+    <link rel="stylesheet" href="{% static 'dashboard/styles.css' %}">
+</head>
+<body>
+    <div style="position: absolute; top: 10px; right: 10px;">
+        {% if request.user.is_authenticated %}
+            Logged in as: {{ request.user.email }}
+            <form method="POST" action="{% url 'user:logout_view' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+            <div>
+                Active Controller: {{ active_controller }}
+            </div>
+            <button type="button" onclick="takeControl()">Take Control</button>
+        {% else %}
+            Not logged in
+        {% endif %}
+    </div>
+    <div class="container">
+        <header class="header">
+            <div class="title">Control App</div>
+            <div id="time-display" class="time-display">{{ current_time }}</div>
+            <div id="first-param">Zone: </div>
+            <div id="second-param">Activation: </div>
+        </header>
+
+        <!-- Current View Section -->
+        <section id="current-view" class="tile-view">
+            <h2>Current View</h2>
+            <div class="tile-grid">
+                {% for i in tile_range %}
+                    <div class="tile-container">
+                        <div class="tile-label">A{{ i }}</div>
+                        <div class="tile" id="current-tile-{{ i }}"></div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Preview View Section -->
+        <section id="preview-view" class="tile-view">
+            <h2>Preview View</h2>
+            <div class="tile-grid">
+                {% for i in tile_range %}
+                    <div class="tile-container">
+                        <div class="tile-label">A{{ i }}</div>
+                        <div class="tile" id="preview-tile-{{ i }}"></div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+        
+        <section id="legend-view">
+            <h2>Legend</h2>
+            <div class ="table-container">
+                <table border="1">
+                    <tbody id="legend-table-body">
+                        <!-- Render triggers row -->
+                        <tr>
+                            {% for item in output_data %}
+                                <th>
+                                    {% if item.trigger|stringformat:"s" in triggers_to_replace %}
+                                        20
+                                    {% else %}
+                                        {{ item.trigger }}
+                                    {% endif %}
+                                </th>
+                            {% endfor %}
+                        </tr>
+                        
+                        <!-- Render thumbnails row -->
+                        <tr>
+                            {% for item in output_data %}
+                                <td>
+                                    {% if item.thumb %}
+                                        <img src="{{ item.thumb }}" alt="Thumbnail" style="width:100px;height:auto;">
+                                    {% else %}
+                                        No thumbnail available
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button id="refresh-legend">Update Legend</button>
+            <select id="setup-dropdown">
+                {% for id in ids %}
+                    <option value="{{ id.0 }}">{{ id.1 }}</option>
+                {% empty %}
+                    <option value="">No IDs available</option>
+                {% endfor %}
+            </select>            
+        </section>
+
+        <section>
+            <h2> Device Id details </h2>
+            <div id="device-response"> </div>
+                <div id="device-data-container"></div>
+        </section>
+    </div>
+
+    <a href="{% url 'page_1' %}" class="button">Go to Page 1</a>
+    <script src="{% static 'dashboard/scripts.js' %}"></script>
+</body>
+</html>
