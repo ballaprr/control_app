@@ -1,0 +1,24 @@
+[Unit]
+Description=Courtside Control Django Application
+After=network.target
+
+[Service]
+Type=exec
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/control_app/backend/control_app
+Environment=PATH=/home/ubuntu/control_app/backend/control_app/show-courtside-env/bin
+EnvironmentFile=/home/ubuntu/control_app/backend/control_app/.env
+ExecStart=/home/ubuntu/control_app/backend/control_app/show-courtside-env/bin/gunicorn \
+    --workers 3 \
+    --bind 0.0.0.0:8000 \
+    --timeout 120 \
+    --max-requests 1000 \
+    --max-requests-jitter 100 \
+    control_app.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
