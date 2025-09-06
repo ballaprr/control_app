@@ -79,10 +79,10 @@ const Dashboard = () => {
   useEffect(() => {
     const handleKeyPress = (event) => {
       if (!hasControl) return; // Only allow keyboard input if user has control
-      
+
       // Handle 'z' reset first, before any other processing
       if (event.key === 'z') {
-        // Clear both parameters and reset state
+        // Clear both parameters and reset state like original
         setFirstParam('');
         setSecondParam('');
         setSelectedTiles(new Set());
@@ -91,12 +91,11 @@ const Dashboard = () => {
         console.log('Reset: Cleared both parameters and state');
         return; // Exit early to prevent further processing
       }
-      
+
+      // Add characters to buffer (like original static files)
       let newKeyBuffer = keyBuffer;
-      
       if (event.key.length === 1 || event.key === 'Enter') {
         newKeyBuffer += event.key;
-        setKeyBuffer(newKeyBuffer);
       }
 
       // Tile group mapping
@@ -109,28 +108,32 @@ const Dashboard = () => {
         'e': [8, 9, 10, 11, 12, 13, 14] // Tiles A8 to A14
       };
 
-      // Handle zone selection (first parameter)
+      // Handle zone selection (first parameter) - clear buffer after processing like original
       if (['0', 'a', 'b', 'c', 'd', 'e'].includes(newKeyBuffer)) {
         setFirstParam(newKeyBuffer);
         const tileIndices = keyToTileGroupMap[newKeyBuffer];
         setSelectedTiles(new Set(tileIndices));
         updatePreviewTiles(tileIndices, secondParam);
-        setKeyBuffer('');
+        console.log("firstParam: ", newKeyBuffer);
+        setKeyBuffer(''); // Clear buffer immediately like original (line 348)
+        return;
       }
 
-      // Handle activation selection (second parameter)
-      const validSecondParams = Array.from({length: 24}, (_, i) => String(i + 1));
+      // Handle activation selection (second parameter) - like original static files
+      const validSecondParams = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'];
+      console.log('Checking buffer:', newKeyBuffer, 'against valid params:', validSecondParams);
       if (validSecondParams.includes(newKeyBuffer)) {
         setSecondParam(newKeyBuffer);
         updatePreviewTiles(Array.from(selectedTiles), newKeyBuffer);
-        setKeyBuffer('');
+        console.log("secondParam: ", newKeyBuffer);
+        // DON'T clear buffer here - let it accumulate for double digits like original (line 355-363)
       }
 
       // Special key handlers
-
       if (event.key === 'm') {
         handleBlackScreenAll();
         setKeyBuffer('');
+        return;
       }
 
       if (event.key === 'i') {
@@ -142,6 +145,7 @@ const Dashboard = () => {
           }
         }
         setKeyBuffer('');
+        return;
       }
 
       if (event.key === 'f') {
@@ -157,11 +161,13 @@ const Dashboard = () => {
           handleRebootDevice(parseInt(tileNumber, 10));
         }
         setKeyBuffer('');
+        return;
       }
 
       if (event.key === 's') {
         handleSwitchSetup();
         setKeyBuffer('');
+        return;
       }
 
       // Apply changes when Enter is pressed
@@ -170,11 +176,13 @@ const Dashboard = () => {
           handleTriggerAction(firstParam, secondParam);
         }
         setKeyBuffer('');
+        return;
       }
 
-      // Limit buffer length
+      // Update buffer and limit length like original (line 503-505)
+      setKeyBuffer(newKeyBuffer);
       if (newKeyBuffer.length > 2) {
-        setKeyBuffer(newKeyBuffer.slice(-2));
+        setKeyBuffer(newKeyBuffer.slice(-2)); // Keep only last 2 characters
       }
     };
 
