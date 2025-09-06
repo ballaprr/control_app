@@ -1,0 +1,28 @@
+# Production requirements for Courtside Control System
+# Includes all development requirements plus production-specific packages
+
+# Base requirements
+-r requirements.txt
+
+# Production web server
+gunicorn==21.2.0
+
+# Database adapter for PostgreSQL
+psycopg2-binary==2.9.9
+
+# AWS S3 storage (optional)
+django-storages==1.14.2
+boto3==1.34.131
+
+# Security and monitoring
+django-health-check==3.17.0
+
+# Production utilities
+whitenoise==6.6.0  # Alternative to S3 for static files
+
+# Environment variable management
+python-decouple==3.8
+
+# Redis cache (optional)
+redis==5.0.1
+django-redis==5.4.0
