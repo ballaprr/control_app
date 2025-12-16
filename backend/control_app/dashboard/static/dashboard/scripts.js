@@ -172,6 +172,7 @@ window.onload = function() {
 };
 
 function sendTriggerRequest(tile, payload) {
+    console.log(`🚀 Sending trigger request: tile=${tile}, payload=${payload}`);
 
     const keyToTileGroupMap = {
         '0': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],  // All tiles
@@ -193,28 +194,38 @@ function sendTriggerRequest(tile, payload) {
             payload: payload // activation: 1-24
         })
     })
-    .then(response => response.json())
-
-    // Call get request over here, for loop in keyToTileGroupMap[tile], recieve image and update the box
-    // 
-    .then(() => {
+    .then(response => {
+        console.log(`📡 Response status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        console.log(`✅ Response data:`, data);
+        if (data.error) {
+            console.error(`❌ Server error: ${data.error}`);
+            alert(`Error: ${data.error}`);
+            return;
+        }
+        
+        console.log(`🎯 Trigger successful! Fetching updated images...`);
+        
+        // Continue with fetching images
         // Iterate through tile indices and fetch images
         const tileIndices = keyToTileGroupMap[tile] || [];
         const fetchPromises = tileIndices.map(tileIndex => {
-            fetch(`/device-output/${tileIndex}/`) // Adjust endpoint as necessary
+            return fetch(`/device-output/${tileIndex}/`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`Failed to fetch image for tile ${tileIndex}`);
                     }
-                    return response.json(); // Assuming the response is JSON containing a data URL
+                    return response.json();
                 })
-                .then(data => {
+                .then(imgData => {
                     const tileElement = document.getElementById(`current-tile-${tileIndex}`);
-                    if (tileElement && data.src && data.src.startsWith("data:image/")) {
-                        // Apply the image as the tile background
-                        tileElement.style.backgroundImage = `url(${data.src})`;
+                    if (tileElement && imgData.src && imgData.src.startsWith("data:image/")) {
+                        tileElement.style.backgroundImage = `url(${imgData.src})`;
                         tileElement.style.backgroundSize = "cover";
                         tileElement.style.backgroundPosition = "center";
+                        console.log(`✅ Tile ${tileIndex} image updated`);
                     } else {
                         console.error(`Invalid image data for tile ${tileIndex}`);
                     }
@@ -224,7 +235,10 @@ function sendTriggerRequest(tile, payload) {
 
         return Promise.all(fetchPromises);
     })
-    .catch(error => console.error("Error with trigger action request:", error));
+    .catch(error => {
+        console.error("❌ Error with trigger action request:", error);
+        alert(`Request failed: ${error.message}`);
+    });
 
 }
 

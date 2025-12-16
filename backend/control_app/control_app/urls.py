@@ -43,7 +43,7 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')), 
     path('user', include('user.urls')),
     path('arena', include('arena.urls')),
-    path('trigger-action/', views.trigger_action, name='trigger-action'),
+    path('trigger-action/', views.trigger_action_legacy, name='trigger-action'),
     path('device-output/<int:title_Index>/', views.device_output, name='device_output'),
     path('blackscreen/', views.blackscreen, name='blackscreen'),
     path('get-deviceid/<int:tileIndex>/', views.get_deviceid, name='get_deviceid'),

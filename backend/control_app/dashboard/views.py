@@ -11,8 +11,9 @@ from django.views.decorators.csrf import csrf_exempt
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -163,13 +164,13 @@ def fetch_legend_data_api(request, setup_id):
     return JsonResponse(output_data, safe=False)
 
 @api_view(['GET'])
-@authentication_classes([JWTAuthentication])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def device_output(request, title_Index):
     
     try:
-        # Get the current arena from query parameters
-        arena_id = request.GET.get('arena_id')
+        # Get the current arena from query parameters OR session (for legacy dashboard)
+        arena_id = request.GET.get('arena_id') or request.session.get('arena_id')
         if not arena_id:
             return JsonResponse({"error": "No arena_id provided"}, status=400)
         
@@ -211,16 +212,29 @@ def device_output(request, title_Index):
 
 @csrf_exempt
 def reboot_device(request):
-    if Arena.objects.get(id=request.session.get('arena_id')).active_controller != request.user:
-        return JsonResponse({"error": "You are not the active controller"}, status=403)
+    arena_id = request.session.get('arena_id')
+    if not arena_id:
+        return JsonResponse({"error": "No arena in session"}, status=400)
+    
+    try:
+        arena = Arena.objects.get(id=arena_id)
+        if arena.active_controller != request.user:
+            return JsonResponse({"error": "You are not the active controller"}, status=403)
+    except Arena.DoesNotExist:
+        return JsonResponse({"error": "Arena not found"}, status=404)
     
     if request.method == "POST":
         api_key = os.getenv("API_KEY")
         data = json.loads(request.body)
         index = data.get("tile")
-        device_id = TILE_DEVICE_MAP.get("0")[int(index) - 1]
-        if not device_id:
-            return JsonResponse({"error": f"Device id does not exist"}, status=404)
+        
+        # Get device from database instead of global map
+        tile_label = f"A{index}"
+        try:
+            device = Device.objects.get(arena_id=arena_id, tile_label=tile_label)
+            device_id = device.device_id
+        except Device.DoesNotExist:
+            return JsonResponse({"error": f"No device registered for tile {tile_label}"}, status=404)
         
         response = requests.post(f"https://info-beamer.com/api/v1/device/{device_id}/reboot", auth=('', api_key))
         if response.status_code == 200:
@@ -230,12 +244,26 @@ def reboot_device(request):
 
 @csrf_exempt
 def blackscreen(request):
-    if Arena.objects.get(id=request.session.get('arena_id')).active_controller != request.user:
-        return JsonResponse({"error": "You are not the active controller"}, status=403)
+    arena_id = request.session.get('arena_id')
+    if not arena_id:
+        return JsonResponse({"error": "No arena in session"}, status=400)
+    
+    try:
+        arena = Arena.objects.get(id=arena_id)
+        if arena.active_controller != request.user:
+            return JsonResponse({"error": "You are not the active controller"}, status=403)
+    except Arena.DoesNotExist:
+        return JsonResponse({"error": "Arena not found"}, status=404)
     
     if request.method == "POST":
         api_key = os.getenv("API_KEY")
-        device_ids = TILE_DEVICE_MAP.get("0")
+        
+        # Get all device IDs for this arena from database
+        devices = Device.objects.filter(arena_id=arena_id)
+        device_ids = [device.device_id for device in devices]
+        
+        if not device_ids:
+            return JsonResponse({"error": "No devices registered for this arena"}, status=404)
 
         def send_request(device_id):
             url = f'https://info-beamer.com/api/v1/device/{device_id}/node/root/remote/trigger/'
@@ -275,15 +303,27 @@ def takecontrol(request):
           
 @csrf_exempt
 def get_deviceid(request, tileIndex):
-    if Arena.objects.get(id=request.session.get('arena_id')).active_controller != request.user:
-        return JsonResponse({"error": "You are not the active controller"}, status=403)
+    arena_id = request.session.get('arena_id')
+    if not arena_id:
+        return JsonResponse({"error": "No arena in session"}, status=400)
+    
+    try:
+        arena = Arena.objects.get(id=arena_id)
+        if arena.active_controller != request.user:
+            return JsonResponse({"error": "You are not the active controller"}, status=403)
+    except Arena.DoesNotExist:
+        return JsonResponse({"error": "Arena not found"}, status=404)
     
     try:
         api_key = os.getenv("API_KEY")
-        tileIndex = int(tileIndex) - 1
-        device_id = TILE_DEVICE_MAP.get("0")[tileIndex]
-        if not device_id:
-            return JsonResponse({"error": f"Device id does not exist"}, status=404)
+        tile_label = f"A{tileIndex}"
+        
+        # Get device from database instead of global map
+        try:
+            device = Device.objects.get(arena_id=arena_id, tile_label=tile_label)
+            device_id = device.device_id
+        except Device.DoesNotExist:
+            return JsonResponse({"error": f"No device registered for tile {tile_label}"}, status=404)
         
         response = requests.get(f"https://info-beamer.com/api/v1/device/{device_id}/sensor", auth=('', api_key))
         response = response.json()
@@ -301,11 +341,102 @@ def get_deviceid(request, tileIndex):
     except (ValueError, IndexError):
         return JsonResponse({"error": "Invalid index"}, status=400)
 
+@csrf_exempt
+def trigger_action_legacy(request):
+    """Legacy trigger action for Django template - uses session auth"""
+    import time
+    
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Not authenticated"}, status=401)
+    
+    api_key = os.getenv("API_KEY")
+    if not api_key:
+        return JsonResponse({"error": "API key is missing"}, status=500)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON body"}, status=400)
+
+    arena_id = request.session.get('arena_id')
+    zone = data.get("zone") or data.get("tile")
+    payload = data.get("payload")
+    
+    if not arena_id:
+        return JsonResponse({"error": "No arena in session"}, status=400)
+    
+    if not zone or not payload:
+        return JsonResponse({"error": "Missing zone/tile or payload"}, status=400)
+    
+    # Check if user has control of the arena
+    try:
+        arena = Arena.objects.get(id=arena_id)
+        if arena.active_controller != request.user:
+            return JsonResponse({"error": "You are not the active controller"}, status=403)
+    except Arena.DoesNotExist:
+        return JsonResponse({"error": "Arena not found"}, status=404)
+
+    try:
+        payload_int = int(payload)
+    except ValueError:
+        return JsonResponse({"error": "Payload must be an integer"}, status=400)
+
+    # Map zones to tile numbers
+    zone_to_tiles_map = {
+        '0': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        'a': [1, 2, 3, 4],
+        'b': [6, 7, 8, 9],
+        'c': [11, 12, 13, 14],
+        'd': [1, 2, 3, 4, 5, 6, 7],
+        'e': [8, 9, 10, 11, 12, 13, 14]
+    }
+    
+    tile_numbers = zone_to_tiles_map.get(zone)
+    if not tile_numbers:
+        return JsonResponse({"error": f"Zone {zone} not recognized"}, status=400)
+
+    # Get all devices for the zone
+    devices = Device.objects.filter(
+        arena=arena, 
+        tile_label__in=[f"A{tile}" for tile in tile_numbers]
+    )
+    
+    if not devices.exists():
+        return JsonResponse({"error": f"No devices registered for zone {zone}"}, status=404)
+
+    device_ids = [device.device_id for device in devices]
+
+    def send_request(device_id):
+        if device_id is None:
+            return None
+        try:
+            url = f'https://info-beamer.com/api/v1/device/{device_id}/node/root/remote/trigger/'
+            response = requests.post(url, data={"data": payload}, auth=('', api_key))
+            return {"device_id": device_id, "trigger_status": response.status_code}
+        except requests.RequestException as e:
+            return {"device_id": device_id, "error": str(e)}
+
+    start_time = time.time()
+    print(f"🚀 Legacy: Triggering zone {zone} with {len(device_ids)} devices...")
+
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        responses = list(executor.map(send_request, device_ids))
+
+    responses = [r for r in responses if r is not None]
+    duration_ms = (time.time() - start_time) * 1000
+    print(f"✅ Legacy: Zone {zone} trigger completed in {duration_ms:.2f}ms")
+
+    return JsonResponse({"results": responses, "duration_ms": duration_ms}, status=200)
+
+
 @api_view(['POST'])
-@authentication_classes([JWTAuthentication])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def trigger_action(request):
-    """Trigger an action on devices - Optimized for zone-based triggers"""
+    """Trigger an action on devices - For React frontend with JWT auth"""
     import time
     
     api_key = os.getenv("API_KEY")
@@ -317,8 +448,9 @@ def trigger_action(request):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON body"}, status=400)
 
+    # For React frontend - arena_id in body
     arena_id = data.get("arena_id")
-    zone = data.get("zone")  # Changed from "tile" to "zone"
+    zone = data.get("zone") or data.get("tile")
     payload = data.get("payload")
     setup_id = 257842
 
@@ -415,15 +547,21 @@ def trigger_action(request):
 
 @csrf_exempt
 def switch_setup(request):
+    arena_id = request.session.get('arena_id')
+    if not arena_id:
+        return JsonResponse({"error": "No arena in session"}, status=400)
+    
     if request.method == "POST":
         api_key = os.getenv("API_KEY")
         setup_id = 257387
-        tile = '0'
         payload = setup_id
 
-        device_ids = TILE_DEVICE_MAP.get(tile)
-        if device_ids is None:
-                return JsonResponse({"error": f"Tile {tile} not recognized"}, status=404)
+        # Get all device IDs for this arena from database
+        devices = Device.objects.filter(arena_id=arena_id)
+        device_ids = [device.device_id for device in devices]
+        
+        if not device_ids:
+            return JsonResponse({"error": "No devices registered for this arena"}, status=404)
             
         def send_request(device_id):
             if device_id is None:
